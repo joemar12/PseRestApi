@@ -1,10 +1,5 @@
 ﻿using AutoMapper;
 using PseRestApi.Core.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PseRestApi.Core.Services
 {
@@ -12,6 +7,7 @@ namespace PseRestApi.Core.Services
     {
         private readonly IMapper _mapper;
         private readonly IPseClient _client;
+
         public PseApiService(IMapper mapper, IPseClient client)
         {
             _mapper = mapper;

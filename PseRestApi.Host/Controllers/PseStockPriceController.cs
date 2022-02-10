@@ -8,7 +8,6 @@ namespace PseRestApi.Host.Controllers
     [Route("[controller]")]
     public class PseStockPriceController : ControllerBase
     {
-
         private readonly ILogger<PseStockPriceController> _logger;
         private IPseApiService _pseApiService;
 

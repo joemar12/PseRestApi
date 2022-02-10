@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.ResponseModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PseRestApi.Core.Mappers
 {

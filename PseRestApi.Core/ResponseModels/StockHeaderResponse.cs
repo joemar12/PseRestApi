@@ -6,9 +6,9 @@
         {
             records = new List<StockHeader>();
         }
+
         public int count { get; set; }
         public IEnumerable<StockHeader> records { get; set; }
-
     }
 
     public class StockHeader

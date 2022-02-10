@@ -1,25 +1,16 @@
 ﻿using Flurl.Http;
 using Flurl.Http.Configuration;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using PseRestApi.Core.ResponseModels;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PseRestApi.Core.Services
 {
     public class PseClient : IPseClient
     {
         private readonly IFlurlClient _client;
+
         public PseClient(IFlurlClientFactory clientFactory, IOptions<PseApiOptions> options)
         {
-
             IFlurlClient client = clientFactory.Get(options.Value.BaseUrl);
             client.Settings.BeforeCall = call =>
             {

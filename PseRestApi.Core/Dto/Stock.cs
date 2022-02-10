@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PseRestApi.Core.Dto
+﻿namespace PseRestApi.Core.Dto
 {
-    public  class Stock
+    public class Stock
     {
         public Stock()
         {
@@ -19,6 +13,5 @@ namespace PseRestApi.Core.Dto
         public DateTime? LastTradeDate { get; set; }
         public double PercentChange { get; set; }
         public double Volume { get; set; }
-
     }
 }
