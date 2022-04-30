@@ -8,7 +8,7 @@ namespace PseRestApi.Core
     {
         public static IServiceCollection AddPseClient(this IServiceCollection services)
         {
-            services.AddTransient<IPseClient, PseClient>();
+            services.AddScoped<IPseClient, PseClient>();
             services.AddAutoMapper(typeof(StockDtoMappingProfile));
             services.AddScoped<IPseApiService, PseApiService>();
             return services;
