@@ -17,6 +17,7 @@ namespace PseRestApi.Host.Controllers
             _pseApiService = pseApiService;
         }
         
+        [HttpGet]
         public async Task<Stock> Get([FromQuery] string symbol)
         {
             return await _pseApiService.GetStockLatestPrice(symbol.ToUpper().Trim());
