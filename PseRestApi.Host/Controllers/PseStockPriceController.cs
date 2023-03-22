@@ -5,7 +5,7 @@ using PseRestApi.Core.Services;
 namespace PseRestApi.Host.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("stockprice")]
 public class PseStockPriceController : ControllerBase
 {
     private readonly ILogger<PseStockPriceController> _logger;
