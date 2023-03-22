@@ -2,16 +2,15 @@
 using PseRestApi.Core.Mappers;
 using PseRestApi.Core.Services;
 
-namespace PseRestApi.Core
+namespace PseRestApi.Core;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddPseClient(this IServiceCollection services)
     {
-        public static IServiceCollection AddPseClient(this IServiceCollection services)
-        {
-            services.AddScoped<IPseClient, PseClient>();
-            services.AddAutoMapper(typeof(StockDtoMappingProfile));
-            services.AddScoped<IPseApiService, PseApiService>();
-            return services;
-        }
+        services.AddScoped<IPseClient, PseClient>();
+        services.AddAutoMapper(typeof(StockDtoMappingProfile));
+        services.AddScoped<IPseApiService, PseApiService>();
+        return services;
     }
 }

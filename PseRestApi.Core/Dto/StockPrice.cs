@@ -1,8 +1,7 @@
-﻿namespace PseRestApi.Core.Dto
+﻿namespace PseRestApi.Core.Dto;
+
+public class StockPrice
 {
-    public class StockPrice
-    {
-        public string? Currency { get; set; }
-        public double Price { get; set; }
-    }
+    public string? Currency { get; set; }
+    public double Price { get; set; }
 }

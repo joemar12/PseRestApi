@@ -1,9 +1,8 @@
 ﻿using PseRestApi.Core.Dto;
 
-namespace PseRestApi.Core.Services
+namespace PseRestApi.Core.Services;
+
+public interface IPseApiService
 {
-    public interface IPseApiService
-    {
-        Task<Stock> GetStockLatestPrice(string symbol);
-    }
+    Task<Stock> GetStockLatestPrice(string symbol);
 }
