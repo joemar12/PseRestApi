@@ -1,7 +1,9 @@
 using Flurl.Http.Configuration;
 using PseRestApi.Core;
 using PseRestApi.Core.Services;
+using PseRestApi.Infrastructure;
 using System.Threading.RateLimiting;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<PseApiOptions>(builder.Configuration.GetSection(PseApiOptions.ConfigSectionName));
 builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPseClient();
 
 // only allow 10 requests per minute and a maximum of 10 concurrent requests

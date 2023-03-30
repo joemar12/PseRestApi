@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PseRestApi.Core\PseRestApi.Core.csproj" />
+    <ProjectReference Include="..\PseRestApi.Infrastructure\PseRestApi.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

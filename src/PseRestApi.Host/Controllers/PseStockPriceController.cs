@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using PseRestApi.Core.Dto;
 using PseRestApi.Core.Services;
 
 namespace PseRestApi.Host.Controllers;
@@ -18,11 +17,27 @@ public class PseStockPriceController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<Stock> Get([FromQuery] string symbol)
+    [Route("{symbol}/{date?}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Get(string symbol, DateTime? date = null)
     {
         try
         {
-            return await _pseApiService.GetStockLatestPrice(symbol.ToUpper().Trim());
+            if (string.IsNullOrEmpty(symbol))
+            {
+                return BadRequest(new { Error = "Symbol is required" });
+            }
+            if (date == null)
+            {
+                return Ok(await _pseApiService.GetStockLatestPrice(symbol.ToUpper().Trim()));
+            }
+            else
+            {
+                var result = await _pseApiService.GetHistoricalPrice(symbol, date);
+                return result != null ? Ok(result) : NotFound();
+            }
         }
         catch (Exception ex)
         {

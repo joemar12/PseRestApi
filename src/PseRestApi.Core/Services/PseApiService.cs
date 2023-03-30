@@ -14,6 +14,11 @@ public class PseApiService : IPseApiService
         _client = client;
     }
 
+    public Task<Stock> GetHistoricalPrice(string symbol, DateTime? date)
+    {
+        return null!;
+    }
+
     public async Task<Stock> GetStockLatestPrice(string symbol)
     {
         var result = new Stock();
