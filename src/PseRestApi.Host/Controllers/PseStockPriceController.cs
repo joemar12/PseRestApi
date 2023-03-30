@@ -17,11 +17,11 @@ public class PseStockPriceController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{symbol}/{date?}")]
+    [Route("{symbol}/{asOfDate?}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Get(string symbol, DateTime? date = null)
+    public async Task<IActionResult> Get(string symbol, DateTime? asOfDate = null)
     {
         try
         {
@@ -29,13 +29,13 @@ public class PseStockPriceController : ControllerBase
             {
                 return BadRequest(new { Error = "Symbol is required" });
             }
-            if (date == null)
+            if (asOfDate == null)
             {
                 return Ok(await _pseApiService.GetStockLatestPrice(symbol.ToUpper().Trim()));
             }
             else
             {
-                var result = await _pseApiService.GetHistoricalPrice(symbol, date);
+                var result = await _pseApiService.GetHistoricalPrice(symbol, asOfDate);
                 return result != null ? Ok(result) : NotFound();
             }
         }

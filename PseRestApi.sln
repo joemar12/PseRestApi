@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Host", "src\PseR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Core", "src\PseRestApi.Core\PseRestApi.Core.csproj", "{76BFEB47-BD01-4CF4-AF72-B2F2B14552B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PseRestApi.Domain", "src\PseRestApi.Domain\PseRestApi.Domain.csproj", "{274EE895-05F3-4E59-9381-AD83F36674B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Domain", "src\PseRestApi.Domain\PseRestApi.Domain.csproj", "{274EE895-05F3-4E59-9381-AD83F36674B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PseRestApi.Infrastructure", "src\PseRestApi.Infrastructure\PseRestApi.Infrastructure.csproj", "{0F8BDB7D-0BB2-49A3-BB6A-82199683E4AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Infrastructure", "src\PseRestApi.Infrastructure\PseRestApi.Infrastructure.csproj", "{0F8BDB7D-0BB2-49A3-BB6A-82199683E4AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PseRestApi.SyncJob", "PseRestApi.SyncJob\PseRestApi.SyncJob.csproj", "{4CE68E8B-F21B-40FF-9AFD-E87A70E33D4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{0F8BDB7D-0BB2-49A3-BB6A-82199683E4AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F8BDB7D-0BB2-49A3-BB6A-82199683E4AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F8BDB7D-0BB2-49A3-BB6A-82199683E4AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CE68E8B-F21B-40FF-9AFD-E87A70E33D4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CE68E8B-F21B-40FF-9AFD-E87A70E33D4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CE68E8B-F21B-40FF-9AFD-E87A70E33D4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CE68E8B-F21B-40FF-9AFD-E87A70E33D4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

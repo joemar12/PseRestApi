@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.ResponseModels;
+using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Mappers;
 
@@ -26,5 +27,16 @@ public class StockDtoMappingProfile : Profile
         CreateMap<StockSummaryResponse, Stock>()
             .ForMember(dest => dest.PercentChange, opt => opt.MapFrom(src => src.percChangeClose))
             .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => src.totalVolume));
+
+        CreateMap<HistoricalTradingData, StockPrice>()
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.LastTradePrice))
+            .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Currency));
+
+        CreateMap<HistoricalTradingData, Stock>()
+            .ForMember(dest => dest.SecurityName, opt => opt.MapFrom(src => src.SecurityInfo.SecurityName))
+            .ForMember(dest => dest.PercentChange, opt => opt.MapFrom(src => src.PercChangeClose))
+            .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => src.TotalVolume))
+            .ForMember(dest => dest.LastTradeDate, opt => opt.MapFrom(src => src.LastTradedDate))
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src));
     }
 }

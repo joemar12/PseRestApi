@@ -15,8 +15,8 @@ public class AppDbContext : DbContext, IAppDbContext
     {
         _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
     }
-    public DbSet<HistoricalTradingData> StockData => Set<HistoricalTradingData>();
-    public DbSet<SecurityInfo> StockCompanies => Set<SecurityInfo>();
+    public DbSet<HistoricalTradingData> HistoricalTradingData => Set<HistoricalTradingData>();
+    public DbSet<SecurityInfo> SecurityInfo => Set<SecurityInfo>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

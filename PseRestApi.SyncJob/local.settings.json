@@ -1,0 +1,5 @@
+{
+"ConnectionStrings": {
+    "DefaultConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PseStockPriceDb"
+  }
+}  

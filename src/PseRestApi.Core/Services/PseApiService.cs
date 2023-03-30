@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PseRestApi.Core.Common.Interfaces;
 using PseRestApi.Core.Dto;
 
 namespace PseRestApi.Core.Services;
@@ -7,16 +9,25 @@ public class PseApiService : IPseApiService
 {
     private readonly IMapper _mapper;
     private readonly IPseClient _client;
+    private readonly IAppDbContext _appDbContext;
 
-    public PseApiService(IMapper mapper, IPseClient client)
+    public PseApiService(IMapper mapper, IPseClient client, IAppDbContext appDbContext)
     {
         _mapper = mapper;
         _client = client;
+        _appDbContext = appDbContext;
     }
 
-    public Task<Stock> GetHistoricalPrice(string symbol, DateTime? date)
+    public async Task<Stock> GetHistoricalPrice(string symbol, DateTime? asOfDate)
     {
-        return null!;
+        var historicalTradingData = await _appDbContext.HistoricalTradingData
+            .Include(x => x.SecurityInfo)
+            .Where(x => x.Symbol == symbol && x.LastTradedDate <= asOfDate)
+            .OrderByDescending(x => x.LastTradedDate)
+            .FirstOrDefaultAsync();
+
+        var stock = _mapper.Map<Stock>(historicalTradingData);
+        return stock;
     }
 
     public async Task<Stock> GetStockLatestPrice(string symbol)
