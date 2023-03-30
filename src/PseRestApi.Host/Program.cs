@@ -1,14 +1,15 @@
 using Flurl.Http.Configuration;
 using PseRestApi.Core;
 using PseRestApi.Core.Services;
+using PseRestApi.Host;
 using PseRestApi.Infrastructure;
+using PseRestApi.Infrastructure.Persistence;
 using System.Threading.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -17,9 +18,14 @@ builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPseClient();
 
-// only allow 10 requests per minute and a maximum of 10 concurrent requests
 builder.Services.AddRateLimiter(options =>
 {
+    var rateLimitConfig = builder.Configuration.GetSection("RateLimitConfig").Get<RateLimitConfig>();
+    rateLimitConfig ??= new RateLimitConfig()
+    {
+        PermitLimit = 10,
+        WindowInMinutes = 1
+    };
     options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
         PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
@@ -27,16 +33,16 @@ builder.Services.AddRateLimiter(options =>
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 10,
+                PermitLimit = rateLimitConfig.PermitLimit,
                 QueueLimit = 0,
-                Window = TimeSpan.FromMinutes(1)
+                Window = TimeSpan.FromMinutes(rateLimitConfig.WindowInMinutes)
             })),
         PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
         RateLimitPartition.GetConcurrencyLimiter(
             partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
             factory: partition => new ConcurrencyLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = rateLimitConfig.PermitLimit,
                 QueueLimit = 0,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst
             }))
@@ -64,6 +70,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<AppDbInitializer>();
+    await initializer.InitializeAsync();
 }
 
 app.UseHttpsRedirection();

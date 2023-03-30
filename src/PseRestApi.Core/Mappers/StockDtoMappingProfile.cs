@@ -39,4 +39,18 @@ public class StockDtoMappingProfile : Profile
             .ForMember(dest => dest.LastTradeDate, opt => opt.MapFrom(src => src.LastTradedDate))
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src));
     }
+
+}
+public class HistoricalTradingDataMappingProfile : Profile
+{
+    public HistoricalTradingDataMappingProfile()
+    {
+        CreateMap<StockCompany, SecurityInfo>()
+            .ForMember(dest => dest.SecurityId, opt => opt.MapFrom(src => src.securityId))
+            .ForMember(dest => dest.CompanyId, opt => opt.MapFrom(src => src.listedCompany_companyId))
+            .ForMember(dest => dest.SecurityName, opt => opt.MapFrom(src => src.securityName))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.listedCompany_companyname))
+            .ForMember(dest => dest.Symbol, opt => opt.MapFrom(src => src.symbol))
+            .ForMember(dest => dest.SecurityStatus, opt => opt.MapFrom(src => src.securityStatus));
+    }
 }

@@ -7,8 +7,9 @@ var builder = new HostBuilder();
 builder.ConfigureWebJobs(b =>
 {
     b.AddAzureStorageCoreServices();
-    b.AddAzureStorage();
+    b.AddAzureStorageQueues();
 });
+
 builder.ConfigureLogging((context, b) =>
 {
     b.AddConsole();
