@@ -25,6 +25,7 @@ public static class DependencyInjection
             provider => provider.GetRequiredService<AppDbContext>());
 
         services.AddTransient<IDateTime, DateTimeService>();
+        services.AddScoped<AppDbInitializer>();
         return services;
     }
 }
