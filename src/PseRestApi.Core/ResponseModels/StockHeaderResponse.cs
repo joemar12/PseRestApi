@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace PseRestApi.Core.ResponseModels;
 
@@ -15,36 +15,36 @@ public class StockHeaderResponse
 
 public class StockHeader
 {
-    [JsonPropertyName("headerSqLow")]
+    [JsonProperty("headerSqLow")]
     public double? SqLow { get; set; }
-    [JsonPropertyName("headerFiftyTwoWeekHigh")]
+    [JsonProperty("headerFiftyTwoWeekHigh")]
     public double? FiftyTwoWeekHigh { get; set; }
-    [JsonPropertyName("headerChangeClose")]
+    [JsonProperty("headerChangeClose")]
     public double? ChangeClose { get; set; }
-    [JsonPropertyName("headerChangeClosePercChangeClose")]
+    [JsonProperty("headerChangeClosePercChangeClose")]
     public double? ChangeClosePercChangeClose { get; set; }
     public DateTime? LastTradedDate { get; set; }
-    [JsonPropertyName("headerTotalValue")]
+    [JsonProperty("headerTotalValue")]
     public double? TotalValue { get; set; }
-    [JsonPropertyName("headerLastTradePrice")]
+    [JsonProperty("headerLastTradePrice")]
     public double? LastTradePrice { get; set; }
-    [JsonPropertyName("headerSqHigh")]
+    [JsonProperty("headerSqHigh")]
     public double? SqHigh { get; set; }
     public string? Currency { get; set; }
-    [JsonPropertyName("headerPercChangeClose")]
+    [JsonProperty("headerPercChangeClose")]
     public double? PercChangeClose { get; set; }
-    [JsonPropertyName("headerFiftyTwoWeekLow")]
+    [JsonProperty("headerFiftyTwoWeekLow")]
     public double? FiftyTwoWeekLow { get; set; }
-    [JsonPropertyName("headerSqPrevious")]
+    [JsonProperty("headerSqPrevious")]
     public double? SqPrevious { get; set; }
-    [JsonPropertyName("securitySymbol")]
+    [JsonProperty("securitySymbol")]
     public string? Symbol { get; set; }
-    [JsonPropertyName("headerCurrentPe")]
+    [JsonProperty("headerCurrentPe")]
     public string? CurrentPe { get; set; }
-    [JsonPropertyName("headerSqOpen")]
+    [JsonProperty("headerSqOpen")]
     public double? SqOpen { get; set; }
-    [JsonPropertyName("headerAvgPrice")]
+    [JsonProperty("headerAvgPrice")]
     public double? AvgPrice { get; set; }
-    [JsonPropertyName("headerTotalVolume")]
+    [JsonProperty("headerTotalVolume")]
     public double? TotalVolume { get; set; }
 }

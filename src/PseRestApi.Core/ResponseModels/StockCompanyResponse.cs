@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace PseRestApi.Core.ResponseModels;
 
@@ -12,10 +12,10 @@ public class StockCompanyResponse
 public class StockCompany
 {
     public string? SecurityStatus { get; set; }
-    [JsonPropertyName("listedCompany_companyId")]
+    [JsonProperty("listedCompany_companyId")]
     public int CompanyId { get; set; }
     public string? Symbol { get; set; }
-    [JsonPropertyName("listedCompany_companyname")]
+    [JsonProperty("listedCompany_companyName")]
     public string? CompanyName { get; set; }
     public int SecurityId { get; set; }
     public string? SecurityName { get; set; }
