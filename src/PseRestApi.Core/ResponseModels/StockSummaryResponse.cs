@@ -2,10 +2,10 @@
 
 public class StockSummaryResponse
 {
-    public double? totalVolume { get; set; }
-    public string? indicator { get; set; }
-    public double? percChangeClose { get; set; }
-    public string? lastTradedPrice { get; set; }
-    public string? securityAlias { get; set; }
-    public string? securitySymbol { get; set; }
+    public double? TotalVolume { get; set; }
+    public string? Indicator { get; set; }
+    public double? PercChangeClose { get; set; }
+    public string? LastTradedPrice { get; set; }
+    public string? SecurityAlias { get; set; }
+    public string? SecuritySymbol { get; set; }
 }

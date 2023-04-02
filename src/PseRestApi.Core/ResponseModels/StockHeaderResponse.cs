@@ -1,33 +1,50 @@
-﻿namespace PseRestApi.Core.ResponseModels;
+﻿using System.Text.Json.Serialization;
+
+namespace PseRestApi.Core.ResponseModels;
 
 public class StockHeaderResponse
 {
     public StockHeaderResponse()
     {
-        records = new List<StockHeader>();
+        Records = new List<StockHeader>();
     }
 
-    public int count { get; set; }
-    public IEnumerable<StockHeader> records { get; set; }
+    public int Count { get; set; }
+    public IEnumerable<StockHeader> Records { get; set; }
 }
 
 public class StockHeader
 {
-    public double? headerSqLow { get; set; }
-    public double? headerFiftyTwoWeekHigh { get; set; }
-    public double? headerChangeClose { get; set; }
-    public double? headerChangeClosePercChangeClose { get; set; }
-    public DateTime? lastTradedDate { get; set; }
-    public double? headerTotalValue { get; set; }
-    public double? headerLastTradePrice { get; set; }
-    public double? headerSqHigh { get; set; }
-    public string? currency { get; set; }
-    public double? headerPercChangeClose { get; set; }
-    public double? headerFiftyTwoWeekLow { get; set; }
-    public double? headerSqPrevious { get; set; }
-    public string? securitySymbol { get; set; }
-    public string? headerCurrentPe { get; set; }
-    public double? headerSqOpen { get; set; }
-    public double? headerAvgPrice { get; set; }
-    public double? headerTotalVolume { get; set; }
+    [JsonPropertyName("headerSqLow")]
+    public double? SqLow { get; set; }
+    [JsonPropertyName("headerFiftyTwoWeekHigh")]
+    public double? FiftyTwoWeekHigh { get; set; }
+    [JsonPropertyName("headerChangeClose")]
+    public double? ChangeClose { get; set; }
+    [JsonPropertyName("headerChangeClosePercChangeClose")]
+    public double? ChangeClosePercChangeClose { get; set; }
+    public DateTime? LastTradedDate { get; set; }
+    [JsonPropertyName("headerTotalValue")]
+    public double? TotalValue { get; set; }
+    [JsonPropertyName("headerLastTradePrice")]
+    public double? LastTradePrice { get; set; }
+    [JsonPropertyName("headerSqHigh")]
+    public double? SqHigh { get; set; }
+    public string? Currency { get; set; }
+    [JsonPropertyName("headerPercChangeClose")]
+    public double? PercChangeClose { get; set; }
+    [JsonPropertyName("headerFiftyTwoWeekLow")]
+    public double? FiftyTwoWeekLow { get; set; }
+    [JsonPropertyName("headerSqPrevious")]
+    public double? SqPrevious { get; set; }
+    [JsonPropertyName("securitySymbol")]
+    public string? Symbol { get; set; }
+    [JsonPropertyName("headerCurrentPe")]
+    public string? CurrentPe { get; set; }
+    [JsonPropertyName("headerSqOpen")]
+    public double? SqOpen { get; set; }
+    [JsonPropertyName("headerAvgPrice")]
+    public double? AvgPrice { get; set; }
+    [JsonPropertyName("headerTotalVolume")]
+    public double? TotalVolume { get; set; }
 }

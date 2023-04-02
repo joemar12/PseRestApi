@@ -1,18 +1,22 @@
-﻿namespace PseRestApi.Core.ResponseModels;
+﻿using System.Text.Json.Serialization;
+
+namespace PseRestApi.Core.ResponseModels;
 
 public class StockCompanyResponse
 {
-    public int count { get; set; }
-    public int totalCount { get; set; }
-    public IEnumerable<StockCompany>? records { get; set; }
+    public int Count { get; set; }
+    public int TotalCount { get; set; }
+    public IEnumerable<StockCompany>? Records { get; set; }
 }
 
 public class StockCompany
 {
-    public string? securityStatus { get; set; }
-    public int listedCompany_companyId { get; set; }
-    public string? symbol { get; set; }
-    public string? listedCompany_companyname { get; set; }
-    public int securityId { get; set; }
-    public string? securityName { get; set; }
+    public string? SecurityStatus { get; set; }
+    [JsonPropertyName("listedCompany_companyId")]
+    public int CompanyId { get; set; }
+    public string? Symbol { get; set; }
+    [JsonPropertyName("listedCompany_companyname")]
+    public string? CompanyName { get; set; }
+    public int SecurityId { get; set; }
+    public string? SecurityName { get; set; }
 }

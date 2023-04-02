@@ -35,13 +35,13 @@ public class PseApiService : IPseApiService
         var result = new Stock();
         var allStocks = await _client.GetAllStockSummary();
         var stockCompany = await _client.FindSecurityOrCompany(symbol);
-        if (stockCompany != null && stockCompany.records != null)
+        if (stockCompany != null && stockCompany.Records != null)
         {
-            var companyDetail = stockCompany.records.FirstOrDefault();
-            var stockSummary = allStocks.Where(x => x.securitySymbol == symbol).FirstOrDefault();
+            var companyDetail = stockCompany.Records.FirstOrDefault();
+            var stockSummary = allStocks.Where(x => x.SecuritySymbol == symbol).FirstOrDefault();
             if (stockSummary != null && companyDetail != null)
             {
-                var stockHeader = await _client.GetStockHeader(companyDetail.listedCompany_companyId, companyDetail.securityId);
+                var stockHeader = await _client.GetStockHeader(companyDetail.CompanyId, companyDetail.SecurityId);
                 if (stockHeader != null)
                 {
                     _mapper.Map(stockHeader, result);
