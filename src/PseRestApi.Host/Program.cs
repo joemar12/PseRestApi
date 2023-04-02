@@ -6,7 +6,6 @@ using PseRestApi.Infrastructure;
 using PseRestApi.Infrastructure.Persistence;
 using System.Threading.RateLimiting;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();

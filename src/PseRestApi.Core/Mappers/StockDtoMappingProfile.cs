@@ -2,6 +2,7 @@
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.ResponseModels;
 using PseRestApi.Domain.Entities;
+using System.Security.AccessControl;
 
 namespace PseRestApi.Core.Mappers;
 
@@ -33,6 +34,6 @@ public class StockDtoMappingProfile : Profile
             .ForMember(dest => dest.PercentChange, opt => opt.MapFrom(src => src.PercChangeClose))
             .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => src.TotalVolume))
             .ForMember(dest => dest.LastTradeDate, opt => opt.MapFrom(src => src.LastTradedDate))
-            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src));
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => new List<HistoricalTradingData>() { src }));
     }
 }
