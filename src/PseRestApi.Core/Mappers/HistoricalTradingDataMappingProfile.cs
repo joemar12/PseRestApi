@@ -8,7 +8,7 @@ public class HistoricalTradingDataMappingProfile : Profile
 {
     public HistoricalTradingDataMappingProfile()
     {
-        CreateMap<StockCompany, SecurityInfo>();
-        CreateMap<StockHeader, HistoricalTradingData>();
+        CreateMap<StockCompany, SecurityInfo>(MemberList.Source);
+        CreateMap<StockHeader, HistoricalTradingData>(MemberList.Source);
     }
 }

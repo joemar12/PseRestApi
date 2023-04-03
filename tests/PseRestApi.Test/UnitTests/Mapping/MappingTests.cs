@@ -27,6 +27,12 @@ public class MappingTests
     }
 
     [Fact]
+    public void MappingConfigShouldBeValid()
+    {
+        _mapper.ConfigurationProvider.AssertConfigurationIsValid();
+    }
+
+    [Fact]
     public void ShouldMapSecurityNameAndSymbolFromApiResponse()
     {
         var source = _fixture.Create<StockCompany>();
