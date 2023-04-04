@@ -17,6 +17,7 @@ public class AppDbContext : DbContext, IAppDbContext
     }
     public DbSet<HistoricalTradingData> HistoricalTradingData => Set<HistoricalTradingData>();
     public DbSet<SecurityInfo> SecurityInfo => Set<SecurityInfo>();
+    public DbSet<SyncBatchData> SyncBatchData => Set<SyncBatchData>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
