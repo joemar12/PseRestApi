@@ -40,7 +40,7 @@ public class StockHeader
     [JsonProperty("securitySymbol")]
     public string? Symbol { get; set; }
     [JsonProperty("headerCurrentPe")]
-    public double? CurrentPe { get; set; }
+    public string? CurrentPe { get; set; }
     [JsonProperty("headerSqOpen")]
     public double? SqOpen { get; set; }
     [JsonProperty("headerAvgPrice")]

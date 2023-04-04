@@ -22,7 +22,6 @@ public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
         {
             if (!string.IsNullOrEmpty(stockSummary.SecuritySymbol))
             {
-                await Task.Delay(1000); //debounce to prevent api rate limit
                 var apiResponse = await _pseClient.FindSecurityOrCompany(stockSummary.SecuritySymbol);
                 if (apiResponse != null && apiResponse.Records != null)
                 {

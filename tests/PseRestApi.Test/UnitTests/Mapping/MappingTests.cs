@@ -118,6 +118,9 @@ public class MappingTests
     public void ShouldMapFromApiResponseToStockPriceArchiveData()
     {
         var source = _fixture.Create<StockHeader>();
+        source.CurrentPe = "1234";
+
+        double? currentPeParsed = double.TryParse(source.CurrentPe, out var pe) ? pe : null;
         var destination = _mapper.Map<HistoricalTradingData>(source);
         using (new AssertionScope())
         {
@@ -135,10 +138,22 @@ public class MappingTests
             destination.FiftyTwoWeekLow.Should().Be(source.FiftyTwoWeekLow);
             destination.SqPrevious.Should().Be(source.SqPrevious);
             destination.Symbol.Should().Be(source.Symbol);
-            destination.CurrentPe.Should().Be(source.CurrentPe);
+            destination.CurrentPe.Should().Be(currentPeParsed);
             destination.SqOpen.Should().Be(source.SqOpen);
             destination.AvgPrice.Should().Be(source.AvgPrice);
             destination.TotalVolume.Should().Be(source.TotalVolume);
+        }
+    }
+    [Fact]
+    public void ShouldMapToNullCurrentPeIfSourceValueIsInvalid()
+    {
+        var source = _fixture.Create<StockHeader>();
+        source.CurrentPe = "ddf";
+        var destination = _mapper.Map<HistoricalTradingData>(source);
+        using (new AssertionScope())
+        {
+            destination.Should().NotBeNull();
+            destination.CurrentPe.Should().BeNull();
         }
     }
 }

@@ -1,50 +1,80 @@
-﻿using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using PseRestApi.Core.Common;
+using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.SecurityInfoSync;
 
-public class SecurityInfoDataSyncService : ISyncService
+public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecurityInfoDataSyncService
 {
-    private readonly ISecurityInfoSyncDataProvider _syncDataProvider;
-    private readonly ISyncDataStagingService _syncDataStagingService;
-    private readonly IDbConnectionProvider _connectionProvider;
-    private readonly ILogger<SecurityInfoDataSyncService> _logger;
     public SecurityInfoDataSyncService(
         ISecurityInfoSyncDataProvider syncDataProvider,
         ISyncDataStagingService syncDataStagingService,
         IDbConnectionProvider connectionProvider,
-        ILogger<SecurityInfoDataSyncService> logger)
+        ILogger<SecurityInfoDataSyncService> logger) : base(syncDataProvider, syncDataStagingService, connectionProvider, logger)
     {
-        _syncDataProvider = syncDataProvider;
-        _syncDataStagingService = syncDataStagingService;
-        _connectionProvider = connectionProvider;
-        _logger = logger;
     }
 
-    public async Task Sync()
+    public override async Task Sync()
     {
-        var syncData = _syncDataProvider.GetSyncData();
-        var batchId = await _syncDataStagingService.Stage(syncData);
-        using var connection = _connectionProvider.CreateConnection();
-
-        var sqlCommand = GetMergeCommand(batchId);
-        try
-        {
-            await connection.ExecuteAsync(sqlCommand);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SecurityInfo sync failed.");
-            throw;
-        }
+        await Sync(options =>
+            options
+            .WithStaging()
+            .WithMergeCommand(MergeCommand())
+            .WithCleanupCommand(CleanupCommand())
+        );
     }
 
-    private string GetMergeCommand(Guid batchId)
+    private string CleanupCommand()
     {
-        var command = $"";
-        return "";
+        var sql = $$"""
+                    DELETE
+                    FROM dbo.SyncBatchData
+                    WHERE BatchId = @BatchId
+                    """;
+        return sql;
+    }
+
+    private string MergeCommand()
+    {
+        var sql = $$"""
+                  SET IDENTITY_INSERT dbo.SecurityInfo ON;
+                  MERGE dbo.SecurityInfo as tgt
+                  USING (SELECT DISTINCT
+                  			JSON_VALUE(Data, '$.SecurityId') as SecurityId,
+                  			JSON_VALUE(Data, '$.Symbol') as Symbol,
+                  			JSON_VALUE(Data, '$.CompanyId') as CompanyId,
+                  			JSON_VALUE(Data, '$.CompanyName') as CompanyName,
+                  			JSON_VALUE(Data, '$.SecurityStatus') as SecurityStatus,
+                  			JSON_VALUE(Data, '$.SecurityName') as SecurityName
+                  		FROM dbo.SyncBatchData
+                  		WHERE BatchId = @BatchId)
+                  AS src (SecurityId, Symbol, CompanyId, CompanyName, SecurityStatus, SecurityName)
+                  On src.SecurityId = tgt.SecurityId
+                  WHEN MATCHED THEN
+                  	UPDATE SET
+                  		Symbol = src.Symbol,
+                  		CompanyName = src.CompanyName,
+                  		SecurityStatus = src.SecurityStatus,
+                  		SecurityName = src.SecurityName
+                  WHEN NOT MATCHED THEN
+                  	INSERT (SecurityId,
+                  			Symbol,
+                  			CompanyId,
+                  			CompanyName,
+                  			SecurityStatus,
+                  			SecurityName,
+                  			Created,
+                  			LastModified)
+                  	VALUES (src.SecurityId,
+                  			src.Symbol,
+                  			src.CompanyId,
+                  			src.CompanyName,
+                  			src.SecurityStatus,
+                  			src.SecurityName,
+                  			SYSDATETIME(),
+                  			SYSDATETIME());
+                  SET IDENTITY_INSERT dbo.SecurityInfo OFF;
+                  """;
+        return sql;
     }
 }

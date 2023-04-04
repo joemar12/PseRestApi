@@ -16,6 +16,7 @@ builder.Services.Configure<PseApiOptions>(builder.Configuration.GetSection(PseAp
 builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPseClient();
+builder.Services.AddDataSyncServices();
 
 builder.Services.AddRateLimiter(options =>
 {

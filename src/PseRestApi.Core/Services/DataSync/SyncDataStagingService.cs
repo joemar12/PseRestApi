@@ -10,14 +10,17 @@ public class SyncDataStagingService : ISyncDataStagingService
 {
     private readonly IDbConnectionProvider _connectionProvider;
     private readonly ILogger<SyncDataStagingService> _logger;
-    public SyncDataStagingService(IDbConnectionProvider dbConnectionProvider, ILogger<SyncDataStagingService> logger)
+    public SyncDataStagingService(
+        IDbConnectionProvider dbConnectionProvider,
+        ILogger<SyncDataStagingService> logger)
     {
         _connectionProvider = dbConnectionProvider;
         _logger = logger;
     }
-    public async Task<Guid> Stage<T>(IAsyncEnumerable<T> stagingData) where T : class
+
+    public async Task<Guid> Stage<T>(IAsyncEnumerable<T> stagingData, Guid? batchId = null) where T : class
     {
-        var batchId = Guid.NewGuid();
+        var safeBatchId = (batchId == null || batchId == Guid.Empty) ? Guid.NewGuid() : batchId.GetValueOrDefault();
         var timeNow = DateTime.Now;
         var syncBatchItems = new List<SyncBatchData>();
         await foreach (var item in stagingData)
@@ -26,7 +29,7 @@ public class SyncDataStagingService : ISyncDataStagingService
             var batchItem = new SyncBatchData()
             {
                 Id = Guid.NewGuid(),
-                BatchId = batchId,
+                BatchId = safeBatchId,
                 Data = jsonValue,
                 Created = timeNow,
                 LastModified = timeNow,
@@ -51,6 +54,6 @@ public class SyncDataStagingService : ISyncDataStagingService
                 throw;
             }
         }
-        return batchId;
+        return safeBatchId;
     }
 }

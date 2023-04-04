@@ -2,7 +2,6 @@
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.ResponseModels;
 using PseRestApi.Domain.Entities;
-using System.Security.AccessControl;
 
 namespace PseRestApi.Core.Mappers;
 

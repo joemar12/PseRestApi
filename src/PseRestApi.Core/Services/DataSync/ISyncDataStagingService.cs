@@ -2,5 +2,5 @@
 
 public interface ISyncDataStagingService
 {
-    Task<Guid> Stage<T>(IAsyncEnumerable<T> stagingData) where T : class;
+    Task<Guid> Stage<T>(IAsyncEnumerable<T> stagingData, Guid? batchId = null) where T : class;
 }
