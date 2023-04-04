@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PseRestApi.Core.Common.Interfaces;
 using PseRestApi.Core.Dto;
 
-namespace PseRestApi.Core.Services;
+namespace PseRestApi.Core.Services.Pse;
 
 public class PseApiService : IPseApiService
 {

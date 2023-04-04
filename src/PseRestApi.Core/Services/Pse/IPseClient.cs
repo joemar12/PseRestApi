@@ -1,6 +1,6 @@
 ﻿using PseRestApi.Core.ResponseModels;
 
-namespace PseRestApi.Core.Services;
+namespace PseRestApi.Core.Services.Pse;
 
 public interface IPseClient
 {

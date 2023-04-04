@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PseRestApi.Core.Mappers;
-using PseRestApi.Core.Services;
+using PseRestApi.Core.Services.Pse;
 using System.Reflection;
 
 namespace PseRestApi.Core;
