@@ -33,7 +33,7 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
         var syncData = _syncDataProvider.GetSyncData();
         if (!_options.SkipStaging)
         {
-            var batchId = await _syncDataStagingService.Stage(syncData);
+            var batchId = await _syncDataStagingService.Stage(syncData, _options.BatchId);
             using var connection = _connectionProvider.CreateConnection();
             if (!string.IsNullOrEmpty(_options.MergeCommand))
             {
