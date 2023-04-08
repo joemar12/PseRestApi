@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PseRestApi.Core.Services.Pse;
+using PseRestApi.Core.Services.PseApi;
 
 namespace PseRestApi.Host.Controllers;
 
