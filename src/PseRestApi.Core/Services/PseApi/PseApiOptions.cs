@@ -1,4 +1,4 @@
-﻿namespace PseRestApi.Core.Services.Pse;
+﻿namespace PseRestApi.Core.Services.PseApi;
 
 public class PseApiOptions
 {

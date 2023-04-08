@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PseRestApi.Core.Services.Pse;
+using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.SecurityInfoSync;

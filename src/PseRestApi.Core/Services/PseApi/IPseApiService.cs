@@ -1,6 +1,6 @@
 ﻿using PseRestApi.Core.Dto;
 
-namespace PseRestApi.Core.Services.Pse;
+namespace PseRestApi.Core.Services.PseApi;
 
 public interface IPseApiService
 {

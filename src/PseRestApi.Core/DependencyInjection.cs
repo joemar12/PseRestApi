@@ -3,7 +3,7 @@ using PseRestApi.Core.Common;
 using PseRestApi.Core.Services.DataSync;
 using PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
 using PseRestApi.Core.Services.DataSync.SecurityInfoSync;
-using PseRestApi.Core.Services.Pse;
+using PseRestApi.Core.Services.PseApi;
 using System.Reflection;
 
 namespace PseRestApi.Core;

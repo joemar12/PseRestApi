@@ -3,7 +3,7 @@ using Flurl.Http.Configuration;
 using Microsoft.Extensions.Options;
 using PseRestApi.Core.ResponseModels;
 
-namespace PseRestApi.Core.Services.Pse;
+namespace PseRestApi.Core.Services.PseApi;
 
 public class PseClient : IPseClient
 {

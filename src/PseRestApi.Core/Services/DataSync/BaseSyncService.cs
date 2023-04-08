@@ -76,7 +76,7 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Data staging failed for {nameof(T)}");
+                    _logger.LogError(ex, $"Data sync failed for {nameof(T)}");
                     throw;
                 }
             }

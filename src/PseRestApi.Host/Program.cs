@@ -1,6 +1,6 @@
 using Flurl.Http.Configuration;
 using PseRestApi.Core;
-using PseRestApi.Core.Services.Pse;
+using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host;
 using PseRestApi.Infrastructure;
 using PseRestApi.Infrastructure.Persistence;
