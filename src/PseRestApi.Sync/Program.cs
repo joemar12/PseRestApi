@@ -12,9 +12,6 @@ using PseRestApi.Infrastructure;
 try
 {
     var host = Host.CreateDefaultBuilder(args)
-        //.ConfigureHostConfiguration(configurationBuilder => {
-        //    configurationBuilder.AddCommandLine(args);
-        //})
         .ConfigureAppConfiguration((context, configuration) =>
         {
             configuration.Sources.Clear();
