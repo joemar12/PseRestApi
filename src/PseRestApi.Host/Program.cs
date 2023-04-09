@@ -72,12 +72,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-using (var scope = app.Services.CreateScope())
-{
-    var initializer = scope.ServiceProvider.GetRequiredService<AppDbInitializer>();
-    await initializer.InitializeAsync();
-}
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

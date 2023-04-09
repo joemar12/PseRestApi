@@ -33,6 +33,39 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+  apply-migrations:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: 7.0.x
+          
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+
+      - name: Get connection string from Key Vault
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            connstr=$(az keyvault secret show --name "DefaultConnectionString" --vault-name "pse-api-secrets" --query "value")
+            echo "::add-mask::$connstr"
+            echo "connection-string=$connstr" >> $GITHUB_ENV
+
+      - name: Update database
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+          dotnet ef database update -c AppDbContext -p src/PseRestApi.Infrastructure -s src/PseRestApi.Host --connection ${{ env.connection-string }}
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+
   deploy:
     runs-on: windows-latest
     needs: build
