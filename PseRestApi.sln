@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Infrastructure",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Test", "tests\PseRestApi.Test\PseRestApi.Test.csproj", "{9920D6F4-453F-4061-A524-27ED57420F9B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PseRestApi.Sync", "src\PseRestApi.Sync\PseRestApi.Sync.csproj", "{8500930F-4410-4EE7-8906-1A0B16AA977F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseRestApi.Sync", "src\PseRestApi.Sync\PseRestApi.Sync.csproj", "{8500930F-4410-4EE7-8906-1A0B16AA977F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
