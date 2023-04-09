@@ -21,13 +21,19 @@ jobs:
         with:
           dotnet-version: 7.0.x
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Build WebApp
+        run: dotnet build src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - name: Publish WebApp
+        run: dotnet publish src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Upload artifact for deployment job
+      - name: Build WebJob
+        run: dotnet build src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release
+
+      - name: Publish WebJob
+        run: dotnet publish src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp/app_data/Jobs/Triggered/stockpricesync
+
+      - name: Upload artifact for WebApp deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
