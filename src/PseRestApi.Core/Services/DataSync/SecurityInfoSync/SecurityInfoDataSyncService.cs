@@ -55,7 +55,8 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
                   		Symbol = src.Symbol,
                   		CompanyName = src.CompanyName,
                   		SecurityStatus = src.SecurityStatus,
-                  		SecurityName = src.SecurityName
+                  		SecurityName = src.SecurityName,
+                        LastModified = SYSDATETIME()
                   WHEN NOT MATCHED THEN
                   	INSERT (SecurityId,
                   			Symbol,
