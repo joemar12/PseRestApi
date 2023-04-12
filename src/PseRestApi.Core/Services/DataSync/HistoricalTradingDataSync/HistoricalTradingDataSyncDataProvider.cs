@@ -32,7 +32,9 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
                 if (apiResponse != null && apiResponse.Records != null)
                 {
                     var latestStockTradeData = apiResponse.Records.FirstOrDefault();
-                    if (latestStockTradeData != null && !string.IsNullOrEmpty(latestStockTradeData.Symbol))
+                    if (latestStockTradeData != null &&
+                        !string.IsNullOrEmpty(latestStockTradeData.Symbol) &&
+                        latestStockTradeData.LastTradePrice > 0)
                     {
                         var tradingData = _mapper.Map<HistoricalTradingData>(latestStockTradeData);
                         tradingData.Id = Guid.NewGuid();
