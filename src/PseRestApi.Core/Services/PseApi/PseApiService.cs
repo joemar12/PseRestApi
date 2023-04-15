@@ -24,6 +24,7 @@ public class PseApiService : IPseApiService
             .Include(x => x.SecurityInfo)
             .Where(x => x.Symbol == symbol && x.LastTradedDate <= asOfDate)
             .OrderByDescending(x => x.LastTradedDate)
+            .ThenByDescending(x => x.Created)
             .FirstOrDefaultAsync();
 
         var stock = _mapper.Map<Stock>(historicalTradingData);
