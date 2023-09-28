@@ -23,20 +23,21 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
     {
         //eagerly fetch all security info
         var allSecurityInfo = await _appDbContext.SecurityInfo.ToListAsync();
+        var allStocksFromFrames = await _pseClient.GetStocks();
         var timeNow = DateTime.Now;
+
         foreach (var securityInfo in allSecurityInfo)
         {
             if (!string.IsNullOrEmpty(securityInfo.Symbol))
             {
-                var apiResponse = await _pseClient.GetStockHeader(securityInfo.CompanyId, securityInfo.SecurityId);
-                if (apiResponse != null && apiResponse.Records != null)
+                var stock = allStocksFromFrames.Where(x => x.StockSymbol == securityInfo.Symbol).FirstOrDefault();
+                if (stock != null)
                 {
-                    var latestStockTradeData = apiResponse.Records.FirstOrDefault();
-                    if (latestStockTradeData != null &&
-                        !string.IsNullOrEmpty(latestStockTradeData.Symbol) &&
-                        latestStockTradeData.LastTradePrice > 0)
+                    if (stock != null && 
+                        double.TryParse(stock.Price, out double price) && 
+                        price > 0)
                     {
-                        var tradingData = _mapper.Map<HistoricalTradingData>(latestStockTradeData);
+                        var tradingData = _mapper.Map<HistoricalTradingData>(stock);
                         tradingData.Id = Guid.NewGuid();
                         tradingData.SecurityId = securityInfo.SecurityId;
                         tradingData.Created = timeNow;

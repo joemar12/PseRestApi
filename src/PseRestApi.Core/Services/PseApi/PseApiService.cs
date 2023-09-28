@@ -34,21 +34,12 @@ public class PseApiService : IPseApiService
     public async Task<Stock> GetStockLatestPrice(string symbol)
     {
         var result = new Stock();
-        var stockCompany = await _client.FindSecurityOrCompany(symbol);
-        if (stockCompany != null && stockCompany.Records != null)
+        var stockData = await _client.GetStocks();
+        var stock = stockData.Where(x => x.StockSymbol == symbol).FirstOrDefault();
+        if (stock != null)
         {
-            var companyDetail = stockCompany.Records.FirstOrDefault();
-            if (companyDetail != null)
-            {
-                var stockHeader = await _client.GetStockHeader(companyDetail.CompanyId, companyDetail.SecurityId);
-                if (stockHeader != null)
-                {
-                    _mapper.Map(stockHeader, result);
-                    _mapper.Map(companyDetail, result);
-                }
-            }
+            result = _mapper.Map<Stock>(stock);
         }
-
         return result;
     }
 }

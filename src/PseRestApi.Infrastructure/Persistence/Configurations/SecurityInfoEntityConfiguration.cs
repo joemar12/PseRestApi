@@ -13,6 +13,10 @@ public class SecurityInfoEntityConfiguration : IEntityTypeConfiguration<Security
         builder
             .HasKey(x => x.SecurityId);
 
+        builder
+            .Property(x => x.SecurityId)
+            .ValueGeneratedOnAdd();
+
         builder.Property(x => x.CompanyName)
             .HasMaxLength(100)
             .IsRequired();
@@ -22,8 +26,7 @@ public class SecurityInfoEntityConfiguration : IEntityTypeConfiguration<Security
             .IsRequired();
 
         builder.Property(x => x.SecurityStatus)
-            .HasMaxLength(2)
-            .IsRequired();
+            .HasMaxLength(2);
 
         builder.Property(x => x.Symbol)
             .HasMaxLength(10)

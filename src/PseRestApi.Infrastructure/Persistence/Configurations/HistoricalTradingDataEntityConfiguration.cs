@@ -15,9 +15,15 @@ public class HistoricalTradingDataEntityConfiguration : IEntityTypeConfiguration
             .HasKey(x => x.Id);
 
         builder
+            .Property(x => x.Symbol)
+            .HasMaxLength(10)
+            .IsRequired();
+
+        builder
             .HasOne(x => x.SecurityInfo)
             .WithMany(x => x.HistoricalTradingData)
-            .HasForeignKey(x => x.SecurityId);
+            .HasPrincipalKey(x => x.Symbol)
+            .HasForeignKey(x => x.Symbol);
 
         builder
             .HasIndex(x => x.Symbol);

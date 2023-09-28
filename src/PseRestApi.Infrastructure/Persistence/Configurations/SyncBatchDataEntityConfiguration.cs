@@ -9,7 +9,7 @@ public class SyncBatchDataEntityConfiguration : IEntityTypeConfiguration<SyncBat
     public void Configure(EntityTypeBuilder<SyncBatchData> builder)
     {
         builder.ToTable("SyncBatchData");
-        
+
         builder.HasKey(x => x.Id);
     }
 }

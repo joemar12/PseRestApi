@@ -17,21 +17,13 @@ public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
 
     public async IAsyncEnumerable<SecurityInfo> GetSyncData()
     {
-        var allStocks = await _pseClient.GetAllStockSummary();
-        foreach (var stockSummary in allStocks)
+        var allStocks = await _pseClient.GetStocks();
+        foreach (var stock in allStocks)
         {
-            if (!string.IsNullOrEmpty(stockSummary.SecuritySymbol))
+            if (!string.IsNullOrEmpty(stock.StockSymbol))
             {
-                var apiResponse = await _pseClient.FindSecurityOrCompany(stockSummary.SecuritySymbol);
-                if (apiResponse != null && apiResponse.Records != null)
-                {
-                    var secInfoFromApi = apiResponse.Records.FirstOrDefault();
-                    if (secInfoFromApi != null && !string.IsNullOrEmpty(secInfoFromApi.Symbol))
-                    {
-                        var secInfo = _mapper.Map<SecurityInfo>(secInfoFromApi);
-                        yield return secInfo;
-                    }
-                }
+                var secInfo = _mapper.Map<SecurityInfo>(stock);
+                yield return secInfo;
             }
         }
     }
