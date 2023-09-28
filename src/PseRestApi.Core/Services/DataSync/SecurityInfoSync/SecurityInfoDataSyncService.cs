@@ -37,7 +37,6 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
     private string MergeCommand()
     {
         var sql = $$"""
-                  SET IDENTITY_INSERT dbo.SecurityInfo ON;
                   MERGE dbo.SecurityInfo as tgt
                   USING (SELECT DISTINCT
                   			JSON_VALUE(Data, '$.SecurityId') as SecurityId,
@@ -49,7 +48,7 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
                   		FROM dbo.SyncBatchData
                   		WHERE BatchId = @BatchId)
                   AS src (SecurityId, Symbol, CompanyId, CompanyName, SecurityStatus, SecurityName)
-                  On src.SecurityId = tgt.SecurityId
+                  On src.Symbol = tgt.Symbol
                   WHEN MATCHED THEN
                   	UPDATE SET
                   		Symbol = src.Symbol,
@@ -58,23 +57,20 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
                   		SecurityName = src.SecurityName,
                         LastModified = SYSDATETIME()
                   WHEN NOT MATCHED THEN
-                  	INSERT (SecurityId,
-                  			Symbol,
+                  	INSERT (Symbol,
                   			CompanyId,
                   			CompanyName,
                   			SecurityStatus,
                   			SecurityName,
                   			Created,
                   			LastModified)
-                  	VALUES (src.SecurityId,
-                  			src.Symbol,
+                  	VALUES (src.Symbol,
                   			src.CompanyId,
                   			src.CompanyName,
                   			src.SecurityStatus,
                   			src.SecurityName,
                   			SYSDATETIME(),
                   			SYSDATETIME());
-                  SET IDENTITY_INSERT dbo.SecurityInfo OFF;
                   """;
         return sql;
     }

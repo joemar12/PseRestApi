@@ -1,9 +1,9 @@
 using Flurl.Http.Configuration;
 using PseRestApi.Core;
+using PseRestApi.Core.Services;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host;
 using PseRestApi.Infrastructure;
-using PseRestApi.Infrastructure.Persistence;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);

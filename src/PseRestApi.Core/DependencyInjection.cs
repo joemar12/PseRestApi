@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PseRestApi.Core.Common;
+using PseRestApi.Core.Services;
 using PseRestApi.Core.Services.DataSync;
 using PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
 using PseRestApi.Core.Services.DataSync.SecurityInfoSync;
@@ -17,7 +18,9 @@ public static class DependencyInjection
             Assembly.GetExecutingAssembly());
         services
             .AddScoped<IPseClient, PseClient>()
-            .AddScoped<IPseApiService, PseApiService>();
+            .AddScoped<IPseApiService, PseApiService>()
+            .AddMemoryCache()
+            .AddSingleton<ICacheProvider, CacheProvider>();
 
         return services;
     }

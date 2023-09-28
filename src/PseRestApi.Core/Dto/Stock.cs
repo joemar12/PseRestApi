@@ -10,7 +10,7 @@ public class Stock
     public string? SecurityName { get; set; }
     public string? Symbol { get; set; }
     public IEnumerable<StockPrice> Price { get; set; }
-    public DateTime? LastTradeDate { get; set; }
+    public DateTime? AsOfDate { get; set; }
     public double PercentChange { get; set; }
     public double Volume { get; set; }
 }

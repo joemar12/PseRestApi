@@ -11,6 +11,21 @@ public class HistoricalTradingDataMappingProfile : Profile
         CreateMap<StockCompany, SecurityInfo>(MemberList.Source);
         CreateMap<StockHeader, HistoricalTradingData>(MemberList.None)
             .ForMember(dest => dest.CurrentPe, opt => opt.MapFrom<CurrentPeResolver>());
+
+        CreateMap<StockFromFrames, HistoricalTradingData>(MemberList.None)
+            .ForMember(dest => dest.Symbol, opt => opt.MapFrom(src => src.StockSymbol))
+            .ForMember(dest => dest.TotalVolume, opt => opt.MapFrom(src => src.Volume))
+            .ForMember(dest => dest.TotalValue, opt => opt.MapFrom(src => src.Value))
+            .ForMember(dest => dest.LastTradePrice, opt => opt.MapFrom(src => src.Price))
+            .ForMember(dest => dest.PercChangeClose, opt => opt.MapFrom(src => src.PercentChange))
+            .ForMember(dest => dest.ChangeClose, opt => opt.MapFrom(src => src.Change))
+            .ForMember(dest => dest.LastTradedDate, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => "PHP"));
+
+        CreateMap<StockFromFrames, SecurityInfo>(MemberList.None)
+            .ForMember(dest => dest.Symbol, opt => opt.MapFrom(src => src.StockSymbol))
+            .ForMember(dest => dest.CompanyName, opt => opt.MapFrom(src => src.StockName))
+            .ForMember(dest => dest.SecurityName, opt => opt.MapFrom(src => src.StockName));
     }
 }
 

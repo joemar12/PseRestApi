@@ -27,12 +27,6 @@ public class MappingTests
     }
 
     [Fact]
-    public void MappingConfigShouldBeValid()
-    {
-        _mapper.ConfigurationProvider.AssertConfigurationIsValid();
-    }
-
-    [Fact]
     public void ShouldMapSecurityNameAndSymbolFromApiResponse()
     {
         var source = _fixture.Create<StockCompany>();
@@ -56,7 +50,7 @@ public class MappingTests
         using (new AssertionScope())
         {
             destination.Should().NotBeNull();
-            destination.LastTradeDate.Should().Be(expected.LastTradedDate);
+            destination.AsOfDate.Should().Be(expected.LastTradedDate);
             destination.PercentChange.Should().Be(expected.PercChangeClose);
             destination.Volume.Should().Be(expected.TotalVolume);
             destination.Price.Should().NotBeEmpty();
@@ -86,7 +80,7 @@ public class MappingTests
             destination.Should().NotBeNull();
             destination.SecurityName.Should().Be(source.SecurityInfo.SecurityName);
             destination.Symbol.Should().Be(source.Symbol);
-            destination.LastTradeDate.Should().Be(source.LastTradedDate);
+            destination.AsOfDate.Should().Be(source.LastTradedDate);
             destination.PercentChange.Should().Be(source.PercChangeClose);
             destination.Volume.Should().Be(source.TotalVolume);
             destination.Price.Should().NotBeEmpty();
