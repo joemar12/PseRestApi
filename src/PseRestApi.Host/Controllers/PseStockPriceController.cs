@@ -41,7 +41,7 @@ public class PseStockPriceController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, "PseStockPriceController.Get: An error occured when retrieving the records.");
             throw;
         }
     }
