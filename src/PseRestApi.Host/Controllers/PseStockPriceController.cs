@@ -41,6 +41,7 @@ public class PseStockPriceController : ControllerBase
         }
         catch (Exception ex)
         {
+            // test change to trigger CI
             _logger.LogError(ex, "PseStockPriceController.Get: An error occured when retrieving the records.");
             throw;
         }
