@@ -7,27 +7,6 @@ namespace PseRestApi.Core.Mappers;
 
 public static class ManualMapper
 {
-    public static Stock MapToStock(StockCompany src)
-    {
-        var dest = new Stock();
-        dest.SecurityName = src.SecurityName;
-        dest.Symbol = src.Symbol;
-        return dest;
-    }
-
-    public static SecurityInfo MapToSecurityInfo(StockCompany src)
-    {
-        return new SecurityInfo
-        {
-            SecurityStatus = src.SecurityStatus,
-            CompanyId = src.CompanyId,
-            Symbol = src.Symbol,
-            CompanyName = src.CompanyName,
-            SecurityId = src.SecurityId,
-            SecurityName = src.SecurityName
-        };
-    }
-
     public static SecurityInfo MapToSecurityInfo(StockFromFrames src)
     {
         return new SecurityInfo
@@ -53,31 +32,6 @@ public static class ManualMapper
             LastTradedDate = DateTime.Now,
             Currency = "PHP",
         };
-    }
-
-    public static StockPrice MapToStockPrice(StockHeader src)
-    {
-        return new StockPrice
-        {
-            Currency = src.Currency,
-            Price = src.LastTradePrice ?? 0
-        };
-    }
-
-    public static Stock MapToStock(IEnumerable<StockHeader> headers)
-    {
-        var dest = new Stock();
-        var first = headers?.FirstOrDefault() ?? new StockHeader();
-        dest.AsOfDate = first.LastTradedDate;
-        dest.PercentChange = first.PercChangeClose ?? 0;
-        dest.Volume = first.TotalVolume ?? 0;
-        dest.Price = headers?.Select(h => MapToStockPrice(h)) ?? new List<StockPrice>();
-        return dest;
-    }
-
-    public static Stock MapToStock(StockHeaderResponse src)
-    {
-        return MapToStock(src.Records ?? Enumerable.Empty<StockHeader>());
     }
 
     public static Stock MapToStock(HistoricalTradingData src)
