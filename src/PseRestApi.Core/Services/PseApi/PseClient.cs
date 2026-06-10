@@ -1,6 +1,4 @@
-﻿using Flurl.Http;
-using Flurl.Http.Configuration;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using PseRestApi.Core.ResponseModels;
@@ -10,28 +8,38 @@ namespace PseRestApi.Core.Services.PseApi;
 
 public class PseClient : IPseClient
 {
-    private readonly IFlurlClient _client;
-    private readonly IFlurlClient _framesClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICacheProvider _cacheProvider;
-    private const string CACHE_KEY = "stocks_from_frames";
     private readonly SemaphoreSlim _semaphore;
 
-    public PseClient(IFlurlClientFactory clientFactory, IOptions<PseApiOptions> options, ICacheProvider cacheProvider)
+    public PseClient(IOptions<PseApiOptions> options, ICacheProvider cacheProvider, IHttpClientFactory httpClientFactory)
     {
-        IFlurlClient client = clientFactory.Get(options.Value.BaseUrl);
-        client.Settings.BeforeCall = call =>
-        {
-            call.Request.WithHeader("Referer", options.Value.Referer);
-        };
-        _client = client;
-        _framesClient = clientFactory.Get(options.Value.FramesUrl);
         _cacheProvider = cacheProvider;
+        Options = options?.Value ?? new PseApiOptions();
         _semaphore = new SemaphoreSlim(1, 1);
+        _httpClientFactory = httpClientFactory;
     }
+
+    private PseApiOptions Options { get; }
 
     private async Task<string> GetPseFramesJsonString()
     {
-        var framesResponse = await _framesClient.Request().GetStringAsync();
+        var client = _httpClientFactory.CreateClient(Constants.PseFramesClientName);
+        using var req = new HttpRequestMessage(HttpMethod.Get, string.Empty);
+        if (!string.IsNullOrEmpty(Options.Referer))
+        {
+            if (Uri.TryCreate(Options.Referer, UriKind.Absolute, out var refUri))
+            {
+                req.Headers.Referrer = refUri;
+            }
+            else
+            {
+                req.Headers.Add("Referer", Options.Referer);
+            }
+        }
+        using var resp = await client.SendAsync(req);
+        resp.EnsureSuccessStatusCode();
+        var framesResponse = await resp.Content.ReadAsStringAsync();
         var framesHtmlDoc = new HtmlDocument();
         framesHtmlDoc.LoadHtml(framesResponse);
         var stocksInputElement = framesHtmlDoc.GetElementbyId("JsonId");
@@ -47,7 +55,7 @@ public class PseClient : IPseClient
         try
         {
             await _semaphore.WaitAsync();
-            var cachedData = _cacheProvider.GetFromCache<IEnumerable<StockFromFrames>>(CACHE_KEY);
+            var cachedData = _cacheProvider.GetFromCache<IEnumerable<StockFromFrames>>(Constants.StocksCacheKey);
             if (cachedData != null)
             {
                 return cachedData;
@@ -63,7 +71,7 @@ public class PseClient : IPseClient
                 {
                     pseFramesResponse = JsonSerializer.Deserialize<IEnumerable<StockFromFrames>>(stocksJsonString);
                 }
-                _cacheProvider.SetCache(CACHE_KEY, pseFramesResponse, new MemoryCacheEntryOptions()
+                _cacheProvider.SetCache(Constants.StocksCacheKey, pseFramesResponse, new MemoryCacheEntryOptions()
                 {
                     AbsoluteExpiration = DateTime.Now.AddHours(1),
                     SlidingExpiration = TimeSpan.FromMinutes(10),

@@ -1,5 +1,4 @@
-﻿using Flurl.Http.Configuration;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,11 @@ try
         .ConfigureServices((context, services) =>
         {
             services.Configure<PseApiOptions>(context.Configuration.GetSection(PseApiOptions.ConfigSectionName));
-            services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
+            var pseApiOptions = context.Configuration.GetSection(PseApiOptions.ConfigSectionName).Get<PseApiOptions>() ?? new PseApiOptions();
+            services.AddHttpClient(Constants.PseFramesClientName, client =>
+            {
+                client.BaseAddress = new Uri(pseApiOptions.FramesUrl ?? string.Empty);
+            });
             services.AddInfrastructure(context.Configuration);
             services.AddPseClient();
             services.AddDataSyncServices();

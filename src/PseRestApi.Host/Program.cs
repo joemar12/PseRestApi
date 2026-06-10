@@ -1,4 +1,3 @@
-using Flurl.Http.Configuration;
 using PseRestApi.Core;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host;
@@ -12,7 +11,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<PseApiOptions>(builder.Configuration.GetSection(PseApiOptions.ConfigSectionName));
-builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
+var pseApiOptions = builder.Configuration.GetSection(PseApiOptions.ConfigSectionName).Get<PseApiOptions>() ?? new PseApiOptions();
+builder.Services.AddHttpClient(Constants.PseFramesClientName, client =>
+{
+    client.BaseAddress = new Uri(pseApiOptions.FramesUrl ?? string.Empty);
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPseClient();
 builder.Services.AddDataSyncServices();
