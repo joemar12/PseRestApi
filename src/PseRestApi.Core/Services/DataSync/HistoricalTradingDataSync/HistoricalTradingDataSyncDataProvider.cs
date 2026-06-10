@@ -33,8 +33,8 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
                 var stock = allStocksFromFrames.Where(x => x.StockSymbol == securityInfo.Symbol).FirstOrDefault();
                 if (stock != null)
                 {
-                    if (stock != null && 
-                        double.TryParse(stock.Price, out double price) && 
+                    if (stock != null &&
+                        double.TryParse(stock.Price, out double price) &&
                         price > 0)
                     {
                         var tradingData = _mapper.Map<HistoricalTradingData>(stock);

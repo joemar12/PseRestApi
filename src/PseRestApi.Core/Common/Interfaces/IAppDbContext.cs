@@ -2,6 +2,7 @@
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Common.Interfaces;
+
 public interface IAppDbContext
 {
     DbSet<HistoricalTradingData> HistoricalTradingData { get; }

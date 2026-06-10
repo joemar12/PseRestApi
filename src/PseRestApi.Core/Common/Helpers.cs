@@ -2,6 +2,7 @@
 using System.Data;
 
 namespace PseRestApi.Core.Common;
+
 public static class Helpers
 {
     public static DataTable ToDataTable<T>(this IEnumerable<T> list) where T : class

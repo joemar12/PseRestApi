@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
 namespace PseRestApi.Core.Services;
+
 public interface ICacheProvider
 {
     T GetFromCache<T>(string key);

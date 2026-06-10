@@ -5,6 +5,7 @@ using PseRestApi.Infrastructure.Persistence.Interceptors;
 using System.Reflection;
 
 namespace PseRestApi.Infrastructure.Persistence;
+
 public class AppDbContext : DbContext, IAppDbContext
 {
     private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;

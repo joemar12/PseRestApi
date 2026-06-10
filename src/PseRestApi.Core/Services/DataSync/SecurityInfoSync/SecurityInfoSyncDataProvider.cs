@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using PseRestApi.Core.Services.PseApi;
+﻿using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.SecurityInfoSync;
@@ -7,12 +6,10 @@ namespace PseRestApi.Core.Services.DataSync.SecurityInfoSync;
 public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
 {
     private readonly IPseClient _pseClient;
-    private readonly IMapper _mapper;
 
-    public SecurityInfoSyncDataProvider(IPseClient pseClient, IMapper mapper)
+    public SecurityInfoSyncDataProvider(IPseClient pseClient)
     {
         _pseClient = pseClient;
-        _mapper = mapper;
     }
 
     public async IAsyncEnumerable<SecurityInfo> GetSyncData()
@@ -22,7 +19,7 @@ public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
         {
             if (!string.IsNullOrEmpty(stock.StockSymbol))
             {
-                var secInfo = _mapper.Map<SecurityInfo>(stock);
+                var secInfo = Mappers.ManualMapper.MapToSecurityInfo(stock);
                 yield return secInfo;
             }
         }

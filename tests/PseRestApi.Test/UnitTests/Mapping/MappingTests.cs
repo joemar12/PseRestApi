@@ -1,28 +1,19 @@
 ﻿using AutoFixture;
-using AutoMapper;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using PseRestApi.Core.Dto;
-using PseRestApi.Core.Mappers;
 using PseRestApi.Core.ResponseModels;
 using PseRestApi.Domain.Entities;
 using Xunit;
+using ManualMapper = PseRestApi.Core.Mappers.ManualMapper;
 
 namespace PseRestApi.Test.UnitTests.Mapping;
+
 public class MappingTests
 {
     private readonly IFixture _fixture;
-    private readonly IMapper _mapper;
 
     public MappingTests()
     {
-        var mapperConfig = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<StockDtoMappingProfile>();
-            cfg.AddProfile<HistoricalTradingDataMappingProfile>();
-        });
-
-        _mapper = new Mapper(mapperConfig);
         _fixture = new Fixture();
     }
 
@@ -30,7 +21,7 @@ public class MappingTests
     public void ShouldMapSecurityNameAndSymbolFromApiResponse()
     {
         var source = _fixture.Create<StockCompany>();
-        var destination = _mapper.Map<Stock>(source);
+        var destination = ManualMapper.MapToStock(source);
 
         using (new AssertionScope())
         {
@@ -44,7 +35,7 @@ public class MappingTests
     public void ShouldMapStockPriceDetailsFromApiResponse()
     {
         var mockResponse = _fixture.Create<StockHeaderResponse>();
-        var destination = _mapper.Map<Stock>(mockResponse);
+        var destination = ManualMapper.MapToStock(mockResponse);
 
         var expected = mockResponse.Records.FirstOrDefault()!;
         using (new AssertionScope())
@@ -58,7 +49,8 @@ public class MappingTests
             var destPrice = destination.Price.FirstOrDefault()!;
             destPrice.Price.Should().Be(expected.LastTradePrice);
             destPrice.Currency.Should().Be(expected.Currency);
-        };
+        }
+        ;
     }
 
     [Fact]
@@ -73,7 +65,7 @@ public class MappingTests
             .Without(x => x.SecurityInfo)
             .Create();
         source.SecurityInfo = securityInfo;
-        var destination = _mapper.Map<Stock>(source);
+        var destination = ManualMapper.MapToStock(source);
 
         using (new AssertionScope())
         {
@@ -88,14 +80,15 @@ public class MappingTests
             var destPrice = destination.Price.FirstOrDefault()!;
             destPrice.Price.Should().Be(source.LastTradePrice);
             destPrice.Currency.Should().Be(source.Currency);
-        };
+        }
+        ;
     }
 
     [Fact]
     public void ShouldMapFromApiResponseToSecurityInfoArchiveData()
     {
         var source = _fixture.Create<StockCompany>();
-        var destination = _mapper.Map<SecurityInfo>(source);
+        var destination = ManualMapper.MapToSecurityInfo(source);
         using (new AssertionScope())
         {
             destination.Should().NotBeNull();
@@ -115,7 +108,7 @@ public class MappingTests
         source.CurrentPe = "1234";
 
         double? currentPeParsed = double.TryParse(source.CurrentPe, out var pe) ? pe : null;
-        var destination = _mapper.Map<HistoricalTradingData>(source);
+        var destination = ManualMapper.MapToHistoricalTradingData(source);
         using (new AssertionScope())
         {
             destination.Should().NotBeNull();
@@ -143,7 +136,7 @@ public class MappingTests
     {
         var source = _fixture.Create<StockHeader>();
         source.CurrentPe = "ddf";
-        var destination = _mapper.Map<HistoricalTradingData>(source);
+        var destination = ManualMapper.MapToHistoricalTradingData(source);
         using (new AssertionScope())
         {
             destination.Should().NotBeNull();

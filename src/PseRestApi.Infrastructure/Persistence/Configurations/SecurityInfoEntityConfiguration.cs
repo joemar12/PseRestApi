@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Infrastructure.Persistence.Configurations;
+
 public class SecurityInfoEntityConfiguration : IEntityTypeConfiguration<SecurityInfo>
 {
     public void Configure(EntityTypeBuilder<SecurityInfo> builder)

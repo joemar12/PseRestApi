@@ -3,6 +3,7 @@ using PseRestApi.Core.Common;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
+
 public class HistoricalTradingDataSyncService : BaseSyncService<HistoricalTradingData>, IHistoricalTradingDataSyncService
 {
     public HistoricalTradingDataSyncService(

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace PseRestApi.Core.Common;
+
 public class DbConnectionProvider : IDbConnectionProvider
 {
     private readonly IConfiguration _configuration;

@@ -4,6 +4,7 @@ using PseRestApi.Core.Services.DataSync;
 using Xunit;
 
 namespace PseRestApi.Test.UnitTests.OptionsBuilder;
+
 public class OptionsBuilderTests
 {
     [Fact]

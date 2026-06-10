@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
 namespace PseRestApi.Core.Services;
+
 public class CacheProvider : ICacheProvider
 {
     private const int CacheSeconds = 10;
