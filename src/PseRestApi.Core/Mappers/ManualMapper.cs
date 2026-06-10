@@ -32,43 +32,26 @@ public static class ManualMapper
     {
         return new SecurityInfo
         {
-            SecurityStatus = null,
-            CompanyId = 0,
             Symbol = src.StockSymbol,
             CompanyName = src.StockName,
-            SecurityId = 0,
             SecurityName = src.StockName
         };
     }
 
-    public static HistoricalTradingData MapToHistoricalTradingData(StockHeader src)
+    public static HistoricalTradingData MapToHistoricalTradingData(StockFromFrames src)
     {
         if (src == null) return null!;
-        double? currentPe = null;
-        if (!string.IsNullOrEmpty(src.CurrentPe) && double.TryParse(src.CurrentPe, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
-        {
-            currentPe = double.IsNaN(parsed) || double.IsInfinity(parsed) ? null : parsed;
-        }
 
         return new HistoricalTradingData
         {
-            SqLow = src.SqLow,
-            FiftyTwoWeekHigh = src.FiftyTwoWeekHigh,
-            ChangeClose = src.ChangeClose,
-            ChangeClosePercChangeClose = src.ChangeClosePercChangeClose,
-            LastTradedDate = src.LastTradedDate,
-            TotalValue = src.TotalValue,
-            LastTradePrice = src.LastTradePrice,
-            SqHigh = src.SqHigh,
-            Currency = src.Currency,
-            PercChangeClose = src.PercChangeClose,
-            FiftyTwoWeekLow = src.FiftyTwoWeekLow,
-            SqPrevious = src.SqPrevious,
-            Symbol = src.Symbol,
-            CurrentPe = currentPe,
-            SqOpen = src.SqOpen,
-            AvgPrice = src.AvgPrice,
-            TotalVolume = src.TotalVolume
+            Symbol = src.StockSymbol,
+            TotalVolume = src.Volume,
+            TotalValue = double.TryParse(src.Value, out var value) ? value : null,
+            ChangeClose = double.TryParse(src.Change, out var change) ? change : null,
+            LastTradePrice = double.TryParse(src.Price, out var price) ? price : null,
+            PercChangeClose = double.TryParse(src.PercentChange, out var percentChange) ? percentChange : null,
+            LastTradedDate = DateTime.Now,
+            Currency = "PHP",
         };
     }
 

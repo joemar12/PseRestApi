@@ -1,6 +1,6 @@
 ﻿using AutoFixture;
-using FluentAssertions;
-using FluentAssertions.Execution;
+using AwesomeAssertions;
+using AwesomeAssertions.Execution;
 using PseRestApi.Core.ResponseModels;
 using PseRestApi.Domain.Entities;
 using Xunit;
@@ -101,46 +101,38 @@ public class MappingTests
         }
     }
 
+    private string GenerateRandomDoubleString()
+    {
+        var rnd = new Random();
+        var seed = rnd.NextDouble();
+        return (seed * 1000).ToString();
+    }
+
     [Fact]
     public void ShouldMapFromApiResponseToStockPriceArchiveData()
     {
-        var source = _fixture.Create<StockHeader>();
-        source.CurrentPe = "1234";
+        var source = _fixture.Build<StockFromFrames>()
+            .With(x => x.Value, () => GenerateRandomDoubleString())
+            .With(x => x.Change, () => GenerateRandomDoubleString())
+            .With(x => x.Price, () => GenerateRandomDoubleString())
+            .With(x => x.PercentChange, () => GenerateRandomDoubleString())
+            .Create();
 
-        double? currentPeParsed = double.TryParse(source.CurrentPe, out var pe) ? pe : null;
         var destination = ManualMapper.MapToHistoricalTradingData(source);
+        double? totalValue = string.IsNullOrEmpty(source.Value) ? null : double.Parse(source.Value);
+        double? changeClose = string.IsNullOrEmpty(source.Change) ? null : double.Parse(source.Change);
+        double? lastTradePrice = string.IsNullOrEmpty(source.Price) ? null : double.Parse(source.Price);
+        double? percChangeClose = string.IsNullOrEmpty(source.PercentChange) ? null : double.Parse(source.PercentChange);
         using (new AssertionScope())
         {
             destination.Should().NotBeNull();
-            destination.SqLow.Should().Be(source.SqLow);
-            destination.FiftyTwoWeekHigh.Should().Be(source.FiftyTwoWeekHigh);
-            destination.ChangeClose.Should().Be(source.ChangeClose);
-            destination.ChangeClosePercChangeClose.Should().Be(source.ChangeClosePercChangeClose);
-            destination.LastTradedDate.Should().Be(source.LastTradedDate);
-            destination.TotalValue.Should().Be(source.TotalValue);
-            destination.LastTradePrice.Should().Be(source.LastTradePrice);
-            destination.SqHigh.Should().Be(source.SqHigh);
-            destination.Currency.Should().Be(source.Currency);
-            destination.PercChangeClose.Should().Be(source.PercChangeClose);
-            destination.FiftyTwoWeekLow.Should().Be(source.FiftyTwoWeekLow);
-            destination.SqPrevious.Should().Be(source.SqPrevious);
-            destination.Symbol.Should().Be(source.Symbol);
-            destination.CurrentPe.Should().Be(currentPeParsed);
-            destination.SqOpen.Should().Be(source.SqOpen);
-            destination.AvgPrice.Should().Be(source.AvgPrice);
-            destination.TotalVolume.Should().Be(source.TotalVolume);
-        }
-    }
-    [Fact]
-    public void ShouldMapToNullCurrentPeIfSourceValueIsInvalid()
-    {
-        var source = _fixture.Create<StockHeader>();
-        source.CurrentPe = "ddf";
-        var destination = ManualMapper.MapToHistoricalTradingData(source);
-        using (new AssertionScope())
-        {
-            destination.Should().NotBeNull();
-            destination.CurrentPe.Should().BeNull();
+            destination.Symbol.Should().Be(source.StockSymbol);
+            destination.TotalVolume.Should().Be(source.Volume);
+            destination.TotalValue.Should().Be(totalValue);
+            destination.LastTradePrice.Should().Be(lastTradePrice);
+            destination.PercChangeClose.Should().Be(percChangeClose);
+            destination.ChangeClose.Should().Be(changeClose);
+            destination.Currency.Should().Be("PHP");
         }
     }
 }

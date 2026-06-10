@@ -33,7 +33,7 @@ public class PseApiService : IPseApiService
     {
         var result = new Stock();
         var stockData = await _client.GetStocks();
-        var stock = stockData.Where(x => x.StockSymbol == symbol).FirstOrDefault();
+        var stock = stockData.FirstOrDefault(x => x.StockSymbol == symbol);
         if (stock != null)
         {
             result = Mappers.ManualMapper.MapToStock(stock);
