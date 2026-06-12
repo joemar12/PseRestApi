@@ -7,6 +7,7 @@ using PseRestApi.Infrastructure.Persistence.Interceptors;
 using PseRestApi.Infrastructure.Services;
 
 namespace PseRestApi.Infrastructure;
+
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(

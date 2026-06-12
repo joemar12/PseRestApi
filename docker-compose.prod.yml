@@ -1,0 +1,142 @@
+version: '3.9'
+
+# Production-grade docker-compose configuration for PseRestApi
+# Uses external database and connection string from Docker secret
+# HTTPS: SSL certificate from Docker secret (created with docker secret create)
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # PseRestApi ASP.NET Core application
+  pserestapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: "${BUILD_VERSION:-latest}"
+    image: pserestapi:${BUILD_VERSION:-latest}
+    container_name: pse_api_prod
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # HTTPS Configuration - Choose one:
+      # Option 1: HTTPS via Kestrel (with secret)
+      # ASPNETCORE_URLS: http://+:8080;https://+:8443
+      # ASPNETCORE_Kestrel__Certificates__Default__Path: /run/secrets/ssl_cert
+      # ASPNETCORE_Kestrel__Certificates__Default__Password: ${SSL_CERT_PASSWORD}
+
+      # Option 2: HTTP only (reverse proxy handles HTTPS) - RECOMMENDED
+      ASPNETCORE_URLS: http://+:8080
+
+      # Connection string is read from secret file mounted at /run/secrets/db_connection_string
+      ConnectionStrings__DefaultConnectionString: /run/secrets/db_connection_string
+      # PSE API Configuration
+      PseApiConfig__FramesUrl: "${PSE_FRAMES_URL:-https://frames.pse.com.ph/}"
+      PseApiConfig__Referer: "${PSE_REFERER:-https://www1.pse.com.ph/stockMarket/home.html}"
+      # Rate Limiting
+      RateLimitConfig__PermitLimit: "${RATE_LIMIT_PERMIT:-10}"
+      RateLimitConfig__WindowInMinutes: "${RATE_LIMIT_WINDOW_MINUTES:-1}"
+      # Logging
+      Logging__LogLevel__Default: "${LOG_LEVEL:-Warning}"
+      Logging__LogLevel__Microsoft.AspNetCore: "${LOG_LEVEL_ASPNET:-Warning}"
+    ports:
+      - "${API_PORT:-5000}:8080"
+      # Uncomment if using Kestrel HTTPS (not recommended with reverse proxy)
+      # - "${API_HTTPS_PORT:-5001}:8443"
+    # Uncomment if using Kestrel HTTPS with secret
+    # secrets:
+    #   - db_connection_string
+    #   - ssl_cert
+    secrets:
+      - db_connection_string
+    networks:
+      - pse_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      replicas: 1  # Can scale to multiple replicas with load balancer
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Sync service for background data synchronization
+  pserestapi-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile.Sync
+    image: pserestapi-sync:${BUILD_VERSION:-latest}
+    container_name: pse_sync_prod
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Connection string is read from secret file mounted at /run/secrets/db_connection_string
+      ConnectionStrings__DefaultConnectionString: /run/secrets/db_connection_string
+      PseApiConfig__FramesUrl: "${PSE_FRAMES_URL:-https://frames.pse.com.ph/}"
+      PseApiConfig__Referer: "${PSE_REFERER:-https://www1.pse.com.ph/stockMarket/home.html}"
+      Logging__LogLevel__Default: "${LOG_LEVEL:-Warning}"
+    secrets:
+      - db_connection_string
+    networks:
+      - pse_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Nginx reverse proxy for SSL/TLS termination and load balancing
+  # RECOMMENDED for production: Terminates HTTPS here, proxies HTTP to Kestrel
+  nginx:
+    image: nginx:alpine
+    container_name: pse_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    environment:
+      # Certificate paths (mounted from volume)
+      SSL_CERT_PATH: /etc/nginx/certs/server.crt
+      SSL_KEY_PATH: /etc/nginx/certs/server.key
+    depends_on:
+      - pserestapi
+    networks:
+      - pse_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+secrets:
+  db_connection_string:
+    file: ./secrets/db_connection_string.txt
+  # Uncomment if using Kestrel HTTPS
+  # ssl_cert:
+  #   file: ./secrets/server.pfx
+
+networks:
+  pse_network_prod:
+    driver: bridge

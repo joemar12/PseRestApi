@@ -1,0 +1,40 @@
+# Multi-stage build for PseRestApi.Sync
+
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
+WORKDIR /src
+
+# Copy project files
+COPY ["src/PseRestApi.Sync/PseRestApi.Sync.csproj", "src/PseRestApi.Sync/"]
+COPY ["src/PseRestApi.Core/PseRestApi.Core.csproj", "src/PseRestApi.Core/"]
+COPY ["src/PseRestApi.Infrastructure/PseRestApi.Infrastructure.csproj", "src/PseRestApi.Infrastructure/"]
+COPY ["src/PseRestApi.Domain/PseRestApi.Domain.csproj", "src/PseRestApi.Domain/"]
+
+# Restore dependencies
+RUN dotnet restore "src/PseRestApi.Sync/PseRestApi.Sync.csproj"
+
+# Copy source code
+COPY . .
+
+# Build application
+RUN dotnet build "src/PseRestApi.Sync/PseRestApi.Sync.csproj" -c Release -o /app/build
+
+# Stage 2: Publish
+FROM build AS publish
+RUN dotnet publish "src/PseRestApi.Sync/PseRestApi.Sync.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 3: Runtime
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+
+WORKDIR /app
+
+# Copy published application
+COPY --from=publish /app/publish .
+
+# Create non-root user for security
+RUN useradd -m -u 1001 dotnetuser && chown -R dotnetuser:dotnetuser /app
+USER dotnetuser
+
+# Run application
+ENTRYPOINT ["dotnet", "PseRestApi.Sync.dll"]

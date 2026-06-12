@@ -1,6 +1,4 @@
-﻿using Flurl.Http;
-using Flurl.Http.Configuration;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using PseRestApi.Core.ResponseModels;
@@ -10,28 +8,38 @@ namespace PseRestApi.Core.Services.PseApi;
 
 public class PseClient : IPseClient
 {
-    private readonly IFlurlClient _client;
-    private readonly IFlurlClient _framesClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICacheProvider _cacheProvider;
-    private const string CACHE_KEY = "stocks_from_frames";
     private readonly SemaphoreSlim _semaphore;
 
-    public PseClient(IFlurlClientFactory clientFactory, IOptions<PseApiOptions> options, ICacheProvider cacheProvider)
+    public PseClient(IOptions<PseApiOptions> options, ICacheProvider cacheProvider, IHttpClientFactory httpClientFactory)
     {
-        IFlurlClient client = clientFactory.Get(options.Value.BaseUrl);
-        client.Settings.BeforeCall = call =>
-        {
-            call.Request.WithHeader("Referer", options.Value.Referer);
-        };
-        _client = client;
-        _framesClient = clientFactory.Get(options.Value.FramesUrl);
         _cacheProvider = cacheProvider;
+        Options = options?.Value ?? new PseApiOptions();
         _semaphore = new SemaphoreSlim(1, 1);
+        _httpClientFactory = httpClientFactory;
     }
+
+    private PseApiOptions Options { get; }
 
     private async Task<string> GetPseFramesJsonString()
     {
-        var framesResponse = await _framesClient.Request().GetStringAsync();
+        var client = _httpClientFactory.CreateClient(Constants.PseFramesClientName);
+        using var req = new HttpRequestMessage(HttpMethod.Get, string.Empty);
+        if (!string.IsNullOrEmpty(Options.Referer))
+        {
+            if (Uri.TryCreate(Options.Referer, UriKind.Absolute, out var refUri))
+            {
+                req.Headers.Referrer = refUri;
+            }
+            else
+            {
+                req.Headers.Add("Referer", Options.Referer);
+            }
+        }
+        using var resp = await client.SendAsync(req);
+        resp.EnsureSuccessStatusCode();
+        var framesResponse = await resp.Content.ReadAsStringAsync();
         var framesHtmlDoc = new HtmlDocument();
         framesHtmlDoc.LoadHtml(framesResponse);
         var stocksInputElement = framesHtmlDoc.GetElementbyId("JsonId");
@@ -47,7 +55,7 @@ public class PseClient : IPseClient
         try
         {
             await _semaphore.WaitAsync();
-            var cachedData = _cacheProvider.GetFromCache<IEnumerable<StockFromFrames>>(CACHE_KEY);
+            var cachedData = _cacheProvider.GetFromCache<IEnumerable<StockFromFrames>>(Constants.StocksCacheKey);
             if (cachedData != null)
             {
                 return cachedData;
@@ -63,7 +71,7 @@ public class PseClient : IPseClient
                 {
                     pseFramesResponse = JsonSerializer.Deserialize<IEnumerable<StockFromFrames>>(stocksJsonString);
                 }
-                _cacheProvider.SetCache(CACHE_KEY, pseFramesResponse, new MemoryCacheEntryOptions()
+                _cacheProvider.SetCache(Constants.StocksCacheKey, pseFramesResponse, new MemoryCacheEntryOptions()
                 {
                     AbsoluteExpiration = DateTime.Now.AddHours(1),
                     SlidingExpiration = TimeSpan.FromMinutes(10),
@@ -76,49 +84,5 @@ public class PseClient : IPseClient
         {
             _semaphore.Release();
         }
-    }
-
-    public async Task<StockCompanyResponse> FindSecurityOrCompany(string symbol)
-    {
-        var queryString = new
-        {
-            method = "findSecurityOrCompany",
-            ajax = true,
-            start = 0,
-            limit = 1,
-            query = symbol
-        };
-        return await _client.Request()
-            .AppendPathSegment($"stockMarket/home.html")
-            .SetQueryParams(queryString)
-            .GetJsonAsync<StockCompanyResponse>();
-    }
-
-    public async Task<IEnumerable<StockSummaryResponse>> GetAllStockSummary()
-    {
-        var queryString = new
-        {
-            method = "getSecuritiesAndIndicesForPublic",
-            ajax = true
-        };
-        return await _client.Request()
-            .AppendPathSegment($"stockMarket/home.html")
-            .SetQueryParams(queryString)
-            .GetJsonAsync<IEnumerable<StockSummaryResponse>>();
-    }
-
-    public async Task<StockHeaderResponse> GetStockHeader(int companyId, int securityId)
-    {
-        var queryString = new
-        {
-            method = "fetchHeaderData",
-            ajax = true,
-            company = companyId,
-            security = securityId
-        };
-        return await _client.Request()
-            .AppendPathSegment($"stockMarket/companyInfo.html")
-            .SetQueryParams(queryString)
-            .GetJsonAsync<StockHeaderResponse>();
     }
 }

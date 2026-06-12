@@ -1,0 +1,31 @@
+.git
+.gitignore
+.vscode
+.vs
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build results
+bin/
+obj/
+out/
+.nuget
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# Visual Studio
+*.user
+*.suo
+.localhistory
+
+# Docker volumes (if needed locally)
+sqlserver_data/
+
+# Environment files (don't commit local overrides)
+.env.local
+*.env.local

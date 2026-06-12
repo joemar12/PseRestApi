@@ -1,4 +1,5 @@
 ﻿namespace PseRestApi.Domain.Entities;
+
 public class SecurityInfo : AuditableEntity
 {
     public int SecurityId { get; set; }

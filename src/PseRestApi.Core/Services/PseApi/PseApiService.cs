@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PseRestApi.Core.Common.Interfaces;
 using PseRestApi.Core.Dto;
 
@@ -7,13 +6,12 @@ namespace PseRestApi.Core.Services.PseApi;
 
 public class PseApiService : IPseApiService
 {
-    private readonly IMapper _mapper;
+
     private readonly IPseClient _client;
     private readonly IAppDbContext _appDbContext;
 
-    public PseApiService(IMapper mapper, IPseClient client, IAppDbContext appDbContext)
+    public PseApiService(IPseClient client, IAppDbContext appDbContext)
     {
-        _mapper = mapper;
         _client = client;
         _appDbContext = appDbContext;
     }
@@ -27,7 +25,7 @@ public class PseApiService : IPseApiService
             .ThenByDescending(x => x.Created)
             .FirstOrDefaultAsync();
 
-        var stock = _mapper.Map<Stock>(historicalTradingData);
+        var stock = historicalTradingData == null ? new Stock() : Mappers.ManualMapper.MapToStock(historicalTradingData);
         return stock;
     }
 
@@ -35,10 +33,10 @@ public class PseApiService : IPseApiService
     {
         var result = new Stock();
         var stockData = await _client.GetStocks();
-        var stock = stockData.Where(x => x.StockSymbol == symbol).FirstOrDefault();
+        var stock = stockData.FirstOrDefault(x => x.StockSymbol == symbol);
         if (stock != null)
         {
-            result = _mapper.Map<Stock>(stock);
+            result = Mappers.ManualMapper.MapToStock(stock);
         }
         return result;
     }

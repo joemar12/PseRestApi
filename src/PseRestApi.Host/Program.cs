@@ -1,6 +1,4 @@
-using Flurl.Http.Configuration;
 using PseRestApi.Core;
-using PseRestApi.Core.Services;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host;
 using PseRestApi.Infrastructure;
@@ -8,12 +6,25 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load connection string from Docker secret if available
+var connectionStringPath = builder.Configuration["ConnectionStrings:DefaultConnectionString"];
+if (!string.IsNullOrEmpty(connectionStringPath) && connectionStringPath.StartsWith("/run/secrets/"))
+{
+    // Read connection string from secret file
+    var secretContent = File.ReadAllText(connectionStringPath).Trim();
+    builder.Configuration["ConnectionStrings:DefaultConnectionString"] = secretContent;
+}
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<PseApiOptions>(builder.Configuration.GetSection(PseApiOptions.ConfigSectionName));
-builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
+var pseApiOptions = builder.Configuration.GetSection(PseApiOptions.ConfigSectionName).Get<PseApiOptions>() ?? new PseApiOptions();
+builder.Services.AddHttpClient(Constants.PseFramesClientName, client =>
+{
+    client.BaseAddress = new Uri(pseApiOptions.FramesUrl ?? string.Empty);
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPseClient();
 builder.Services.AddDataSyncServices();

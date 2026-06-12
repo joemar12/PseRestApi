@@ -1,5 +1,4 @@
-﻿using Flurl.Http.Configuration;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,8 +23,21 @@ try
         })
         .ConfigureServices((context, services) =>
         {
+            // Load connection string from Docker secret if available
+            var connectionStringPath = context.Configuration["ConnectionStrings:DefaultConnectionString"];
+            if (!string.IsNullOrEmpty(connectionStringPath) && connectionStringPath.StartsWith("/run/secrets/"))
+            {
+                // Read connection string from secret file
+                var secretContent = File.ReadAllText(connectionStringPath).Trim();
+                context.Configuration["ConnectionStrings:DefaultConnectionString"] = secretContent;
+            }
+
             services.Configure<PseApiOptions>(context.Configuration.GetSection(PseApiOptions.ConfigSectionName));
-            services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
+            var pseApiOptions = context.Configuration.GetSection(PseApiOptions.ConfigSectionName).Get<PseApiOptions>() ?? new PseApiOptions();
+            services.AddHttpClient(Constants.PseFramesClientName, client =>
+            {
+                client.BaseAddress = new Uri(pseApiOptions.FramesUrl ?? string.Empty);
+            });
             services.AddInfrastructure(context.Configuration);
             services.AddPseClient();
             services.AddDataSyncServices();
