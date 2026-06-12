@@ -1,107 +1,107 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy to Azure
+# name: Build and deploy to Azure
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
+# permissions:
+#   id-token: write
+#   contents: read
 
-jobs:
-  build:
-    runs-on: windows-latest
+# jobs:
+#   build:
+#     runs-on: windows-latest
 
-    steps:
-      - uses: actions/checkout@v3
+#     steps:
+#       - uses: actions/checkout@v3
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v1.7.2
-        with:
-          dotnet-version: 8.0.x
+#       - name: Setup .NET SDK
+#         uses: actions/setup-dotnet@v1.7.2
+#         with:
+#           dotnet-version: 8.0.x
 
-      - name: Build WebApp
-        run: dotnet build src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release
+#       - name: Build WebApp
+#         run: dotnet build src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release
 
-      - name: Publish WebApp
-        run: dotnet publish src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp
+#       - name: Publish WebApp
+#         run: dotnet publish src/PseRestApi.Host/PseRestApi.Host.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Build WebJob
-        run: dotnet build src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release
+#       - name: Build WebJob
+#         run: dotnet build src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release
 
-      - name: Publish WebJob
-        run: dotnet publish src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp/app_data/Jobs/Triggered/stockpricesync
+#       - name: Publish WebJob
+#         run: dotnet publish src/PseRestApi.Sync/PseRestApi.Sync.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp/app_data/Jobs/Triggered/stockpricesync
 
-      - name: Upload artifact for WebApp deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+#       - name: Upload artifact for WebApp deployment job
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: .net-app
+#           path: ${{env.DOTNET_ROOT}}/myapp
 
-  apply-migrations:
-    runs-on: ubuntu-latest
-    needs: build
+#   apply-migrations:
+#     runs-on: ubuntu-latest
+#     needs: build
     
-    steps:
-      - uses: actions/checkout@v3
+#     steps:
+#       - uses: actions/checkout@v3
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v1.7.2
-        with:
-          dotnet-version: 8.0.x
+#       - name: Setup .NET SDK
+#         uses: actions/setup-dotnet@v1.7.2
+#         with:
+#           dotnet-version: 8.0.x
           
-      # - name: Azure Login
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{secrets.AZURE_CREDENTIALS}}
+#       # - name: Azure Login
+#       #   uses: azure/login@v1
+#       #   with:
+#       #     creds: ${{secrets.AZURE_CREDENTIALS}}
 
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+#       - name: Azure CLI Login
+#         uses: azure/login@v2
+#         with:
+#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Get connection string from Key Vault
-        uses: azure/CLI@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            connstr=$(az keyvault secret show --name "DefaultConnectionString" --vault-name "pse-api-secrets" --query "value")
-            echo "::add-mask::$connstr"
-            echo "connection-string=$connstr" >> $GITHUB_ENV
+#       - name: Get connection string from Key Vault
+#         uses: azure/CLI@v2
+#         with:
+#           azcliversion: latest
+#           inlineScript: |
+#             connstr=$(az keyvault secret show --name "DefaultConnectionString" --vault-name "pse-api-secrets" --query "value")
+#             echo "::add-mask::$connstr"
+#             echo "connection-string=$connstr" >> $GITHUB_ENV
 
-      - name: Update database
-        run: |
-          dotnet tool install --global dotnet-ef
-          dotnet tool restore
-          dotnet ef database update -c AppDbContext -p src/PseRestApi.Infrastructure -s src/PseRestApi.Host --connection ${{ env.connection-string }}
-        env:
-          ASPNETCORE_ENVIRONMENT: Production
+#       - name: Update database
+#         run: |
+#           dotnet tool install --global dotnet-ef
+#           dotnet tool restore
+#           dotnet ef database update -c AppDbContext -p src/PseRestApi.Infrastructure -s src/PseRestApi.Host --connection ${{ env.connection-string }}
+#         env:
+#           ASPNETCORE_ENVIRONMENT: Production
 
-  deploy:
-    runs-on: windows-latest
-    needs: [build, apply-migrations]
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+#   deploy:
+#     runs-on: windows-latest
+#     needs: [build, apply-migrations]
+#     environment:
+#       name: 'Production'
+#       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: .net-app
+#     steps:
+#       - name: Download artifact from build job
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: .net-app
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'psestockprice'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_370729A9AA604305AF5DE8CD18827AAE }}
-          package: .
+#       - name: Deploy to Azure Web App
+#         id: deploy-to-webapp
+#         uses: azure/webapps-deploy@v2
+#         with:
+#           app-name: 'psestockprice'
+#           slot-name: 'Production'
+#           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_370729A9AA604305AF5DE8CD18827AAE }}
+#           package: .
