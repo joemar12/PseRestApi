@@ -1,0 +1,12 @@
+FROM alpine:latest
+
+# Install docker client and curl once at build time
+RUN apk add --no-cache curl docker-cli
+
+# Install supercronic
+RUN curl -L https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64 \
+  -o /usr/local/bin/supercronic \
+  && chmod +x /usr/local/bin/supercronic
+
+# Default command just runs supercronic (crontab will be provided later)
+CMD ["supercronic", "/etc/crontab"]
