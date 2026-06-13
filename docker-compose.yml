@@ -37,6 +37,7 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
 
   # Optional: Sync service (background worker)
   pserestapi-sync:
@@ -64,6 +65,7 @@ services:
       sh -c "echo '0 0,12 * * * docker exec pse_sync dotnet /app/PseRestApi.Sync.dll' | crontab - && crond -f"
     networks:
       - pse_network
+    restart: unless-stopped
 
 secrets:
   db_connection_string:
