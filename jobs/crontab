@@ -1,0 +1,2 @@
+# runs every 7pm mondays-fridays
+0 19 * * 1-5 docker start pse_sync >> /var/log/cron.log 2>&1
