@@ -1,5 +1,4 @@
-version: '3.9'
-
+name: pse_api
 services:
   # PseRestApi ASP.NET Core application
   # Uses external database and connection string from Docker secret
@@ -8,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pse_api
+    container_name: api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080;https://+:8443
@@ -44,7 +43,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.Sync
-    container_name: pse_sync
+    container_name: sync
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       # Connection string is read from secret file mounted at /run/secrets/db_connection_string
@@ -60,7 +59,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.Cron
-    container_name: pse_cron
+    container_name: cron
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
