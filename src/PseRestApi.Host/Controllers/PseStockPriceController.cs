@@ -17,11 +17,11 @@ public class PseStockPriceController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{symbol}/{asOfDate?}")]
+    [Route("{symbol}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Get(string symbol, DateTime? asOfDate = null)
+    public async Task<IActionResult> Get(string symbol,[FromQuery] DateTime? asOfDate = null)
     {
         try
         {
