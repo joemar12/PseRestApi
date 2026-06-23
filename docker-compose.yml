@@ -64,6 +64,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./jobs/crontab:/etc/crontab
+      - ./jobs/catchup.sh:/usr/local/bin/catchup.sh:ro
     networks:
       - pse_network
     restart: unless-stopped
