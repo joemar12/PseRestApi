@@ -36,27 +36,31 @@ public static class ManualMapper
 
     public static Stock MapToStock(HistoricalTradingData src)
     {
-        var dest = new Stock();
-        dest.SecurityName = src.SecurityInfo?.SecurityName;
-        dest.PercentChange = src.PercChangeClose ?? 0;
-        dest.Volume = src.TotalVolume ?? 0;
-        dest.AsOfDate = src.LastTradedDate;
-        dest.Symbol = src.Symbol;
-        dest.Price = new List<StockPrice>
+        var dest = new Stock
         {
-            new StockPrice { Currency = src.Currency, Price = src.LastTradePrice ?? 0 }
+            SecurityName = src.SecurityInfo?.SecurityName,
+            PercentChange = src.PercChangeClose ?? 0,
+            Volume = src.TotalVolume ?? 0,
+            AsOfDate = src.LastTradedDate,
+            Symbol = src.Symbol,
+            Price = new List<StockPrice>
+            {
+                new StockPrice { Currency = src.Currency, Price = src.LastTradePrice ?? 0 }
+            }
         };
         return dest;
     }
 
     public static Stock MapToStock(StockFromFrames src)
     {
-        var dest = new Stock();
-        dest.SecurityName = src.StockName;
-        dest.Symbol = src.StockSymbol;
-        dest.AsOfDate = DateTime.Now;
-        dest.PercentChange = double.TryParse(src.PercentChange, NumberStyles.Any, CultureInfo.InvariantCulture, out var pc) ? pc : 0;
-        dest.Volume = src.Volume;
+        var dest = new Stock
+        {
+            SecurityName = src.StockName,
+            Symbol = src.StockSymbol,
+            AsOfDate = DateTime.Now,
+            PercentChange = double.TryParse(src.PercentChange, NumberStyles.Any, CultureInfo.InvariantCulture, out var pc) ? pc : 0,
+            Volume = src.Volume
+        };
         var price = new StockPrice { Currency = "PHP", Price = 0 };
         if (double.TryParse(src.Price, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedPrice))
         {
