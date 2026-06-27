@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Install docker client and curl once at build time
-RUN apk add --no-cache curl docker-cli coreutils
+RUN apk add --no-cache curl docker-cli coreutils bash
 
 # Install supercronic
 RUN curl -L https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64 \
@@ -10,6 +10,6 @@ RUN curl -L https://github.com/aptible/supercronic/releases/latest/download/supe
 
 # Entrypoint script to run catch-up script first, then supercronic
 COPY cron-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN dos2unix /entrypoint.sh && chmod +x /entrypoint.sh
 
 CMD ["/entrypoint.sh"]
