@@ -34,7 +34,7 @@ public class PseStockPriceController : BaseController
         {
             if (asOfDate == null)
             {
-                var result = await _pseApiService.GetStockLatestPrice(normalizedSymbol);
+                var result = await _pseApiService.GetStockLatestPriceAsync(normalizedSymbol);
                 return result != null
                     ? Success(result, "Latest stock price returned successfully")
                     : ApiError($"Stock '{normalizedSymbol}' not found", StatusCodes.Status404NotFound);

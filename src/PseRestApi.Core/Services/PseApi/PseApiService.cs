@@ -29,7 +29,7 @@ public class PseApiService : IPseApiService
         return stock;
     }
 
-    public async Task<Stock> GetStockLatestPrice(string symbol)
+    public async Task<Stock> GetStockLatestPriceAsync(string symbol)
     {
         var result = new Stock();
         var stockData = await _client.GetStocks();

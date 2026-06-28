@@ -9,7 +9,7 @@ public interface IPseApiService
     /// </summary>
     /// <param name="symbol"></param>
     /// <returns></returns>
-    Task<Stock> GetStockLatestPrice(string symbol);
+    Task<Stock> GetStockLatestPriceAsync(string symbol);
     /// <summary>
     /// Gets the stock price for the given symbol as of the specified date.
     /// </summary>
