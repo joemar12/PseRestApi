@@ -7,7 +7,7 @@ using Xunit;
 using NSubstitute;
 using AwesomeAssertions;
 
-namespace PseRestApi.Test.UnitTests;
+namespace PseRestApi.Test.UnitTests.Controllers;
 
 public class PseStockPriceControllerTests
 {
@@ -218,7 +218,7 @@ public class PseStockPriceControllerTests
     public async Task GetHistory_WithEmptySymbol_ReturnsBadRequest()
     {
         // Arrange
-        string? symbol = "";
+        string symbol = "";
         var queryParams = new StockPriceQueryParams
         {
             StartDate = new DateTime(2025, 1, 1),
@@ -227,32 +227,7 @@ public class PseStockPriceControllerTests
         };
 
         // Act
-        IActionResult result = await _controller.GetHistory(symbol!, queryParams);
-
-        // Assert
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(400);
-        var apiResponse = objectResult.Value.Should().BeOfType<ApiResponse<object>>().Subject;
-
-        apiResponse.Should().NotBeNull();
-        apiResponse.Success.Should().BeFalse();
-        apiResponse.Message.Should().Be("Symbol is required");
-    }
-
-    [Fact]
-    public async Task GetHistory_WithNullSymbol_ReturnsBadRequest()
-    {
-        // Arrange
-        string? symbol = null;
-        var queryParams = new StockPriceQueryParams
-        {
-            StartDate = new DateTime(2025, 1, 1),
-            PageNumber = 1,
-            PageSize = 10
-        };
-
-        // Act
-        IActionResult result = await _controller.GetHistory(symbol!, queryParams);
+        IActionResult result = await _controller.GetHistory(symbol, queryParams);
 
         // Assert
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;

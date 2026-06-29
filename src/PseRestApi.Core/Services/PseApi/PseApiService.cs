@@ -19,6 +19,7 @@ public class PseApiService : IPseApiService
     public async Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateTime? asOfDate)
     {
         var historicalTradingData = await _appDbContext.HistoricalTradingData
+            .AsNoTracking()
             .Include(x => x.SecurityInfo)
             .Where(x => x.Symbol == symbol && x.LastTradedDate <= asOfDate)
             .OrderByDescending(x => x.LastTradedDate)
@@ -47,6 +48,7 @@ public class PseApiService : IPseApiService
         var pageSize = queryParams.PageSize ?? 10;
 
         var query = _appDbContext.HistoricalTradingData
+            .AsNoTracking()
             .Include(x => x.SecurityInfo)
             .Where(h => h.Symbol == stockSymbol
                 && h.LastTradedDate != null
