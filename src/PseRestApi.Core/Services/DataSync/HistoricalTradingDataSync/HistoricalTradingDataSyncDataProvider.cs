@@ -35,7 +35,7 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
                         price > 0)
                     {
                         var tradingData = Mappers.ManualMapper.MapToHistoricalTradingData(stock);
-                        tradingData.Id = Guid.NewGuid();
+                        tradingData.Id = 0; // Let the database auto-generate the Id
                         tradingData.SecurityId = securityInfo.SecurityId;
                         tradingData.Created = timeNow;
                         tradingData.LastModified = timeNow;

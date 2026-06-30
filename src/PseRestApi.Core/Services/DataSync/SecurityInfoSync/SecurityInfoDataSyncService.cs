@@ -28,7 +28,7 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
     {
         var sql = $$"""
                     DELETE
-                    FROM dbo.SyncBatchData
+                    FROM SyncBatchData
                     WHERE BatchId = @BatchId
                     """;
         return sql;
@@ -37,40 +37,25 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
     private string MergeCommand()
     {
         var sql = $$"""
-                  MERGE dbo.SecurityInfo as tgt
-                  USING (SELECT DISTINCT
-                  			JSON_VALUE(Data, '$.SecurityId') as SecurityId,
-                  			JSON_VALUE(Data, '$.Symbol') as Symbol,
-                  			JSON_VALUE(Data, '$.CompanyId') as CompanyId,
-                  			JSON_VALUE(Data, '$.CompanyName') as CompanyName,
-                  			JSON_VALUE(Data, '$.SecurityStatus') as SecurityStatus,
-                  			JSON_VALUE(Data, '$.SecurityName') as SecurityName
-                  		FROM dbo.SyncBatchData
-                  		WHERE BatchId = @BatchId)
-                  AS src (SecurityId, Symbol, CompanyId, CompanyName, SecurityStatus, SecurityName)
-                  On src.Symbol = tgt.Symbol
-                  WHEN MATCHED THEN
-                  	UPDATE SET
-                  		Symbol = src.Symbol,
-                  		CompanyName = src.CompanyName,
-                  		SecurityStatus = src.SecurityStatus,
-                  		SecurityName = src.SecurityName,
-                        LastModified = SYSDATETIME()
-                  WHEN NOT MATCHED THEN
-                  	INSERT (Symbol,
-                  			CompanyId,
-                  			CompanyName,
-                  			SecurityStatus,
-                  			SecurityName,
-                  			Created,
-                  			LastModified)
-                  	VALUES (src.Symbol,
-                  			src.CompanyId,
-                  			src.CompanyName,
-                  			src.SecurityStatus,
-                  			src.SecurityName,
-                  			SYSDATETIME(),
-                  			SYSDATETIME());
+                  INSERT INTO SecurityInfo (Symbol, CompanyId, CompanyName, SecurityStatus, SecurityName, Created, LastModified)
+                  SELECT DISTINCT
+                  			Data->>'SecurityId'::text,
+                  			Data->>'Symbol'::text,
+                  			Data->>'CompanyId'::text,
+                  			Data->>'CompanyName'::text,
+                  			Data->>'SecurityStatus'::text,
+                  			Data->>'SecurityName'::text,
+                  			NOW(),
+                  			NOW()
+                  FROM SyncBatchData
+                  WHERE BatchId = @BatchId
+                  ON CONFLICT (Symbol) DO UPDATE SET
+                  		Symbol = EXCLUDED.Symbol,
+                  		CompanyId = EXCLUDED.CompanyId,
+                  		CompanyName = EXCLUDED.CompanyName,
+                  		SecurityStatus = EXCLUDED.SecurityStatus,
+                  		SecurityName = EXCLUDED.SecurityName,
+                  		LastModified = NOW()
                   """;
         return sql;
     }

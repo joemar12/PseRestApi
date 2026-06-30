@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PseRestApi.Infrastructure.Persistence;
 
 #nullable disable
@@ -12,156 +12,133 @@ using PseRestApi.Infrastructure.Persistence;
 namespace PseRestApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230928105249_AdjustmentsForPseFrames")]
-    partial class AdjustmentsForPseFrames
+    [Migration("20260630145104_InitialPostgresCreate")]
+    partial class InitialPostgresCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("PseRestApi.Domain.Entities.HistoricalTradingData", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("integer");
 
-                    b.Property<double?>("AvgPrice")
-                        .HasColumnType("float");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<double?>("ChangeClose")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("ChangeClosePercChangeClose")
-                        .HasColumnType("float");
+                    b.Property<double?>("Change")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Currency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("CurrentPe")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("FiftyTwoWeekHigh")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("FiftyTwoWeekLow")
-                        .HasColumnType("float");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<double?>("LastTradePrice")
-                        .HasColumnType("float");
+                    b.Property<double?>("PercentChange")
+                        .HasColumnType("double precision");
 
-                    b.Property<DateTime?>("LastTradedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double?>("PercChangeClose")
-                        .HasColumnType("float");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("SecurityId")
-                        .HasColumnType("int");
-
-                    b.Property<double?>("SqHigh")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("SqLow")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("SqOpen")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("SqPrevious")
-                        .HasColumnType("float");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
-                    b.Property<double?>("TotalValue")
-                        .HasColumnType("float");
+                    b.Property<DateOnly?>("TradeDate")
+                        .HasColumnType("date");
 
-                    b.Property<double?>("TotalVolume")
-                        .HasColumnType("float");
+                    b.Property<double?>("Value")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Volume")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Symbol");
 
-                    b.ToTable("HistoricalTradingData", (string)null);
+                    b.ToTable("HistoricalTradingData");
                 });
 
             modelBuilder.Entity("PseRestApi.Domain.Entities.SecurityInfo", b =>
                 {
                     b.Property<int>("SecurityId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SecurityId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SecurityId"));
 
                     b.Property<int>("CompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("SecurityStatus")
                         .HasMaxLength(2)
-                        .HasColumnType("nvarchar(2)");
+                        .HasColumnType("character varying(2)");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("SecurityId");
 
                     b.HasIndex("Symbol")
                         .IsUnique();
 
-                    b.ToTable("SecurityInfo", (string)null);
+                    b.ToTable("SecurityInfo");
                 });
 
             modelBuilder.Entity("PseRestApi.Domain.Entities.SyncBatchData", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("BatchId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

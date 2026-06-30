@@ -1,7 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Npgsql;
 using PseRestApi.Core.Common;
 using PseRestApi.Domain.Entities;
+using System.Data;
 using System.Text.Json;
 
 namespace PseRestApi.Core.Services.DataSync;
@@ -28,7 +29,6 @@ public class SyncDataStagingService : ISyncDataStagingService
             var jsonValue = JsonSerializer.Serialize(item);
             var batchItem = new SyncBatchData()
             {
-                Id = Guid.NewGuid(),
                 BatchId = safeBatchId,
                 Data = jsonValue,
                 Created = timeNow,
@@ -40,13 +40,23 @@ public class SyncDataStagingService : ISyncDataStagingService
         using var connection = _connectionProvider.CreateConnection();
         if (connection != null)
         {
-            using var bulkCopier = new SqlBulkCopy(connection as SqlConnection);
             var sourceTable = syncBatchItems.ToDataTable();
-            bulkCopier.DestinationTableName = "dbo.SyncBatchData";
+            var columnNames = sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
             try
             {
-                connection.Open();
-                await bulkCopier.WriteToServerAsync(sourceTable);
+                await using var npgsqlConnection = connection as NpgsqlConnection ?? throw new InvalidOperationException("Connection is not an NpgsqlConnection");
+                await npgsqlConnection.OpenAsync();
+                await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync("COPY SyncBatchData (Id, BatchId, Data, Created, LastModified) FROM STDIN (FORMAT BINARY)");
+                foreach (DataRow row in sourceTable.Rows)
+                {
+                    await copyWriter.StartRowAsync();
+                    await copyWriter.WriteAsync(row["Id"]);
+                    await copyWriter.WriteAsync(row["BatchId"]);
+                    await copyWriter.WriteAsync(row["Data"] ?? DBNull.Value);
+                    await copyWriter.WriteAsync(row["Created"] ?? DBNull.Value);
+                    await copyWriter.WriteAsync(row["LastModified"] ?? DBNull.Value);
+                }
+                await copyWriter.CompleteAsync();
             }
             catch (Exception ex)
             {

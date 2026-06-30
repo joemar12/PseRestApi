@@ -1,5 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Npgsql;
 using System.Data;
 
 namespace PseRestApi.Core.Common;
@@ -12,5 +12,5 @@ public class DbConnectionProvider : IDbConnectionProvider
         _configuration = configuration;
     }
     public IDbConnection CreateConnection()
-        => new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+        => new NpgsqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
 }

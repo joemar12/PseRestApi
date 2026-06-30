@@ -20,7 +20,7 @@ public class PseStockPriceControllerTests
         SecurityName = "Test Company",
         Symbol = "TEST",
         Price = new List<StockPrice> { new() { Currency = "PHP", Price = 100.00 } },
-        AsOfDate = new DateTime(2025, 1, 15, 15, 30, 0),
+        AsOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15, 15, 30, 0)),
         PercentChange = 2.5,
         Volume = 1500000
     };
@@ -122,7 +122,7 @@ public class PseStockPriceControllerTests
     {
         // Arrange
         string symbol = _mockStock.Symbol!;
-        DateTime asOfDate = new DateTime(2025, 1, 15);
+        DateOnly asOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15));
         _pseApiService.GetStockPriceAsOfDateAsync(Arg.Any<string>(), asOfDate).Returns(Task.FromResult(_mockStock));
 
         // Act
@@ -145,7 +145,7 @@ public class PseStockPriceControllerTests
     {
         // Arrange
         string symbol = "INVALID";
-        DateTime asOfDate = new DateTime(2025, 1, 15);
+        DateOnly asOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15));
         _pseApiService.GetStockPriceAsOfDateAsync(Arg.Any<string>(), asOfDate).Returns(Task.FromResult<Stock>(null!));
 
         // Act
@@ -221,7 +221,7 @@ public class PseStockPriceControllerTests
         string symbol = "";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
             PageNumber = 1,
             PageSize = 10
         };
@@ -246,7 +246,7 @@ public class PseStockPriceControllerTests
         string symbol = "   ";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
             PageNumber = 1,
             PageSize = 10
         };
@@ -296,7 +296,7 @@ public class PseStockPriceControllerTests
         string symbol = "BPI";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
             PageNumber = 0,
             PageSize = 10
         };
@@ -321,7 +321,7 @@ public class PseStockPriceControllerTests
         string symbol = "BPI";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
             PageNumber = 1,
             PageSize = 0
         };
@@ -346,7 +346,7 @@ public class PseStockPriceControllerTests
         string symbol = "BPI";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
             PageNumber = 1,
             PageSize = 101
         };
@@ -371,8 +371,8 @@ public class PseStockPriceControllerTests
         string symbol = "BPI";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
-            EndDate = new DateTime(2025, 1, 31),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2025, 1, 31)),
             PageNumber = 1,
             PageSize = 10
         };
@@ -414,7 +414,8 @@ public class PseStockPriceControllerTests
         string symbol = "bpi";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2025, 1, 31)),
             PageNumber = 1,
             PageSize = 10
         };
@@ -444,7 +445,8 @@ public class PseStockPriceControllerTests
         string symbol = "BPI";
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2025, 1, 1),
+            StartDate = DateOnly.FromDateTime(new DateTime(2025, 1, 1)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2025, 1, 31)),
             PageNumber = 1,
             PageSize = 10
         };

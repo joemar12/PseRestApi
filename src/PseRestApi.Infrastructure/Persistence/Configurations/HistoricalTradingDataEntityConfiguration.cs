@@ -9,9 +9,6 @@ public class HistoricalTradingDataEntityConfiguration : IEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<HistoricalTradingData> builder)
     {
         builder
-            .ToTable("HistoricalTradingData");
-
-        builder
             .HasKey(x => x.Id);
 
         builder

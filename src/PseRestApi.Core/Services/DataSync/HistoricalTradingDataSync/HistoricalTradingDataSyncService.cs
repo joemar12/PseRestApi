@@ -18,7 +18,7 @@ public class HistoricalTradingDataSyncService : BaseSyncService<HistoricalTradin
         await Sync(options =>
             options
             .SkipStaging()
-            .WithTargetTable("dbo.HistoricalTradingData")
+            .WithTargetTable("HistoricalTradingData")
             .WithColumnMappings(new Dictionary<string, string>()
             {
                 { "Id", "Id" },

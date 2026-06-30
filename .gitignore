@@ -364,3 +364,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Environment files (don't commit local overrides)
+*.env.local
+.env.*
+**/.env

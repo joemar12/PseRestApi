@@ -16,7 +16,7 @@ public interface IPseApiService
     /// <param name="symbol"></param>
     /// <param name="asOfDate"></param>
     /// <returns></returns>
-    Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateTime? asOfDate);
+    Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateOnly? asOfDate);
     /// <summary>
     /// Gets the stock price history for the given symbol within the specified date range, only getting the latest trade price per day.
     /// </summary>

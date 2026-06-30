@@ -26,6 +26,7 @@ public class MappingTests
             .Create();
         var source = _fixture
             .Build<HistoricalTradingData>()
+            .With(x => x.TradeDate, () => DateOnly.FromDateTime(DateTime.Now))
             .Without(x => x.SecurityInfo)
             .Create();
         source.SecurityInfo = securityInfo;
@@ -36,13 +37,13 @@ public class MappingTests
             destination.Should().NotBeNull();
             destination.SecurityName.Should().Be(source.SecurityInfo.SecurityName);
             destination.Symbol.Should().Be(source.Symbol);
-            destination.AsOfDate.Should().Be(source.LastTradedDate);
-            destination.PercentChange.Should().Be(source.PercChangeClose);
-            destination.Volume.Should().Be(source.TotalVolume);
+            destination.AsOfDate.Should().Be(source.TradeDate);
+            destination.PercentChange.Should().Be(source.PercentChange);
+            destination.Volume.Should().Be(source.Volume);
             destination.Price.Should().NotBeEmpty();
 
             var destPrice = destination.Price.FirstOrDefault()!;
-            destPrice.Price.Should().Be(source.LastTradePrice);
+            destPrice.Price.Should().Be(source.Price);
             destPrice.Currency.Should().Be(source.Currency);
         }
         ;
@@ -74,11 +75,11 @@ public class MappingTests
         {
             destination.Should().NotBeNull();
             destination.Symbol.Should().Be(source.StockSymbol);
-            destination.TotalVolume.Should().Be(source.Volume);
-            destination.TotalValue.Should().Be(totalValue);
-            destination.LastTradePrice.Should().Be(lastTradePrice);
-            destination.PercChangeClose.Should().Be(percChangeClose);
-            destination.ChangeClose.Should().Be(changeClose);
+            destination.Volume.Should().Be(source.Volume);
+            destination.Value.Should().Be(totalValue);
+            destination.Price.Should().Be(lastTradePrice);
+            destination.PercentChange.Should().Be(percChangeClose);
+            destination.Change.Should().Be(changeClose);
             destination.Currency.Should().Be("PHP");
         }
     }

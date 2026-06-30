@@ -16,13 +16,13 @@ public class PseApiService : IPseApiService
         _appDbContext = appDbContext;
     }
 
-    public async Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateTime? asOfDate)
+    public async Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateOnly? asOfDate)
     {
         var historicalTradingData = await _appDbContext.HistoricalTradingData
             .AsNoTracking()
             .Include(x => x.SecurityInfo)
-            .Where(x => x.Symbol == symbol && x.LastTradedDate <= asOfDate)
-            .OrderByDescending(x => x.LastTradedDate)
+            .Where(x => x.Symbol == symbol && x.TradeDate <= asOfDate)
+            .OrderByDescending(x => x.TradeDate)
             .ThenByDescending(x => x.Created)
             .FirstOrDefaultAsync();
 
@@ -51,29 +51,27 @@ public class PseApiService : IPseApiService
             .AsNoTracking()
             .Include(x => x.SecurityInfo)
             .Where(h => h.Symbol == stockSymbol
-                && h.LastTradedDate != null
-                && h.LastTradedDate >= queryParams.StartDate
-                && (queryParams.EndDate == null || h.LastTradedDate <= queryParams.EndDate)
-                && h.LastTradedDate == _appDbContext.HistoricalTradingData // using a subquery here since EF cannot properly translate grouping by LastTradedDate.Date
-                    .Where(x => x.Symbol == stockSymbol
-                             && x.LastTradedDate != null
-                             && x.LastTradedDate.Value.Date == h.LastTradedDate!.Value.Date)
-                    .Max(x => x.LastTradedDate));
+                && h.TradeDate != null
+                && h.TradeDate >= queryParams.StartDate
+                && (queryParams.EndDate == null || h.TradeDate <= queryParams.EndDate))
+            .GroupBy(x => x.TradeDate)
+            .Select(g => g.OrderByDescending(x => x.TradeDate).FirstOrDefault())
+            .Where(x => x != null);
 
         var pageItems = await query
-            .OrderBy(x => x.LastTradedDate)
+            .OrderBy(x => x.TradeDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new Stock
             {
                 SecurityName = x.SecurityInfo == null ? "" : x.SecurityInfo.SecurityName,
-                PercentChange = x.PercChangeClose ?? 0,
-                Volume = x.TotalVolume ?? 0,
-                AsOfDate = x.LastTradedDate,
+                PercentChange = x.PercentChange ?? 0,
+                Volume = x.Volume ?? 0,
+                AsOfDate = x.TradeDate,
                 Symbol = x.Symbol,
                 Price = new List<StockPrice>
                 {
-                    new StockPrice { Currency = x.Currency, Price = x.LastTradePrice ?? 0 }
+                    new StockPrice { Currency = x.Currency, Price = x.Price ?? 0 }
                 }
             })
             .ToListAsync();

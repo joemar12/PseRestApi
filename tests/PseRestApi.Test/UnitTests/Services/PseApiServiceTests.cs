@@ -19,14 +19,14 @@ public class PseApiServiceTests
     // Mock data
     private readonly HistoricalTradingData _mockHistoricalData1 = new()
     {
-        Id = Guid.NewGuid(),
+        Id = 1,
         SecurityId = 1,
         Symbol = "ABC",
         Currency = "PHP",
-        LastTradePrice = 50.00,
-        LastTradedDate = new DateTime(2026, 6, 25),
-        PercChangeClose = 2.5,
-        TotalVolume = 1000000,
+        Price = 50.00,
+        TradeDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+        PercentChange = 2.5,
+        Volume = 1000000,
         SecurityInfo = new SecurityInfo
         {
             SecurityId = 1,
@@ -37,14 +37,14 @@ public class PseApiServiceTests
 
     private readonly HistoricalTradingData _mockHistoricalData2 = new()
     {
-        Id = Guid.NewGuid(),
+        Id = 2,
         SecurityId = 1,
         Symbol = "ABC",
         Currency = "PHP",
-        LastTradePrice = 49.00,
-        LastTradedDate = new DateTime(2026, 6, 24),
-        PercChangeClose = -1.0,
-        TotalVolume = 900000,
+        Price = 49.00,
+        TradeDate = DateOnly.FromDateTime(new DateTime(2026, 6, 24)),
+        PercentChange = -1.0,
+        Volume = 900000,
         SecurityInfo = new SecurityInfo
         {
             SecurityId = 1,
@@ -55,14 +55,14 @@ public class PseApiServiceTests
 
     private readonly HistoricalTradingData _mockHistoricalDataNoSecurityInfo = new()
     {
-        Id = Guid.NewGuid(),
+        Id = 3,
         SecurityId = 1,
         Symbol = "DEF",
         Currency = "PHP",
-        LastTradePrice = 25.00,
-        LastTradedDate = new DateTime(2026, 6, 25),
-        PercChangeClose = 0.5,
-        TotalVolume = 500000,
+        Price = 25.00,
+        TradeDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+        PercentChange = 0.5,
+        Volume = 500000,
         SecurityInfo = null!
     };
 
@@ -91,17 +91,17 @@ public class PseApiServiceTests
     public async Task GetStockPriceAsOfDateAsync_WithValidSymbolAndDate_ReturnsMatchingStock()
     {
         // Arrange
-        var mockQueryable = Utils.BuildMockDbSet(new [] { _mockHistoricalData1 });
+        var mockQueryable = Utils.BuildMockDbSet(new[] { _mockHistoricalData1 });
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act
-        var result = await _service.GetStockPriceAsOfDateAsync("ABC", new DateTime(2026, 6, 26));
+        var result = await _service.GetStockPriceAsOfDateAsync("ABC", DateOnly.FromDateTime(new DateTime(2026, 6, 26)));
 
         // Assert
         result.Should().NotBeNull();
         result.Symbol.Should().Be("ABC");
         result.SecurityName.Should().Be("ABC Corporation");
-        result.AsOfDate.Should().Be(new DateTime(2026, 6, 25));
+        result.AsOfDate.Should().Be(DateOnly.FromDateTime(new DateTime(2026, 6, 25)));
         result.Price.Should().ContainSingle();
         result.Price.First().Price.Should().Be(50.00);
         result.Price.First().Currency.Should().Be("PHP");
@@ -117,12 +117,12 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act
-        var result = await _service.GetStockPriceAsOfDateAsync("ABC", new DateTime(2026, 6, 25));
+        var result = await _service.GetStockPriceAsOfDateAsync("ABC", DateOnly.FromDateTime(new DateTime(2026, 6, 25)));
 
         // Assert
         result.Should().NotBeNull();
         result.Symbol.Should().Be("ABC");
-        result.AsOfDate.Should().Be(new DateTime(2026, 6, 25));
+        result.AsOfDate.Should().Be(DateOnly.FromDateTime(new DateTime(2026, 6, 25)));
     }
 
     [Fact]
@@ -133,12 +133,12 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act - requesting date after both records, should return the most recent one (June 25)
-        var result = await _service.GetStockPriceAsOfDateAsync("ABC", new DateTime(2026, 6, 26));
+        var result = await _service.GetStockPriceAsOfDateAsync("ABC", DateOnly.FromDateTime(new DateTime(2026, 6, 26)));
 
         // Assert
         result.Should().NotBeNull();
         result.Symbol.Should().Be("ABC");
-        result.AsOfDate.Should().Be(new DateTime(2026, 6, 25));
+        result.AsOfDate.Should().Be(DateOnly.FromDateTime(new DateTime(2026, 6, 25)));
         result.Price.First().Price.Should().Be(50.00);
     }
 
@@ -150,7 +150,7 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act
-        var result = await _service.GetStockPriceAsOfDateAsync("NONEXISTENT", new DateTime(2026, 6, 26));
+        var result = await _service.GetStockPriceAsOfDateAsync("NONEXISTENT", DateOnly.FromDateTime(new DateTime(2026, 6, 26)));
 
         // Assert
         result.Should().NotBeNull();
@@ -167,7 +167,7 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act - date is before the only record
-        var result = await _service.GetStockPriceAsOfDateAsync("ABC", new DateTime(2026, 6, 1));
+        var result = await _service.GetStockPriceAsOfDateAsync("ABC", DateOnly.FromDateTime(new DateTime(2026, 6, 1)));
 
         // Assert
         result.Should().NotBeNull();
@@ -197,7 +197,7 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
 
         // Act
-        var result = await _service.GetStockPriceAsOfDateAsync("DEF", new DateTime(2026, 6, 26));
+        var result = await _service.GetStockPriceAsOfDateAsync("DEF", DateOnly.FromDateTime(new DateTime(2026, 6, 26)));
 
         // Assert
         result.Should().NotBeNull();
@@ -328,8 +328,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25),
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
             PageNumber = 1,
             PageSize = 10
         };
@@ -353,8 +353,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act
@@ -372,8 +372,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act
@@ -391,7 +391,7 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 24)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 24))
         };
 
         // Act
@@ -410,8 +410,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 1),
-            EndDate = new DateTime(2026, 6, 10)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 1)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 10))
         };
 
         // Act
@@ -433,8 +433,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act
@@ -454,8 +454,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act
@@ -465,7 +465,7 @@ public class PseApiServiceTests
         var item = result.Items.Should().ContainSingle().Subject;
         item.Symbol.Should().Be("ABC");
         item.SecurityName.Should().Be("ABC Corporation");
-        item.AsOfDate.Should().Be(new DateTime(2026, 6, 25));
+        item.AsOfDate.Should().Be(DateOnly.FromDateTime(new DateTime(2026, 6, 25)));
         item.PercentChange.Should().Be(2.5);
         item.Volume.Should().Be(1000000);
         item.Price.Should().ContainSingle();
@@ -481,8 +481,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25)
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act
@@ -502,8 +502,8 @@ public class PseApiServiceTests
         _appDbContext.HistoricalTradingData.Returns(mockQueryable);
         var queryParams = new StockPriceQueryParams
         {
-            StartDate = new DateTime(2026, 6, 25),
-            EndDate = new DateTime(2026, 6, 25),
+            StartDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25)),
             PageNumber = 1,
             PageSize = 5
         };
@@ -525,7 +525,7 @@ public class PseApiServiceTests
         var queryParams = new StockPriceQueryParams
         {
             StartDate = null,
-            EndDate = new DateTime(2026, 6, 25)
+            EndDate = DateOnly.FromDateTime(new DateTime(2026, 6, 25))
         };
 
         // Act

@@ -19,11 +19,21 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<HistoricalTradingData> HistoricalTradingData => Set<HistoricalTradingData>();
     public DbSet<SecurityInfo> SecurityInfo => Set<SecurityInfo>();
     public DbSet<SyncBatchData> SyncBatchData => Set<SyncBatchData>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(builder);
     }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // normalize all DateTime/DateTime? properties to UTC
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+        base.ConfigureConventions(configurationBuilder);
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         builder.AddInterceptors(_auditableEntitySaveChangesInterceptor);

@@ -21,7 +21,7 @@ public class PseStockPriceController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Get(string symbol, [FromQuery] DateTime? asOfDate = null)
+    public async Task<IActionResult> Get(string symbol, [FromQuery] DateOnly? asOfDate = null)
     {
         if (string.IsNullOrWhiteSpace(symbol))
         {

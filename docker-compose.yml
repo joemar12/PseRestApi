@@ -77,4 +77,6 @@ secrets:
 
 networks:
   pse_network:
+    external: true
     driver: bridge
+    name: pse_network
