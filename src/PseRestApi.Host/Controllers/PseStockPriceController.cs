@@ -86,6 +86,10 @@ public class PseStockPriceController : BaseController
         try
         {
             var result = await _pseApiService.GetStockPriceHistoryByDateRangeAsync(normalizedSymbol, stockPriceQueryParams);
+            if (result.TotalCount <= 0)
+            {
+                return ApiError($"No price history found for '{normalizedSymbol}' in the specified date range", StatusCodes.Status404NotFound);
+            }
             var response = new ApiResponse<PaginatedResult<Stock>>
             {
                 Success = true,

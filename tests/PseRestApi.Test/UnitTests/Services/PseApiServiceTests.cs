@@ -143,7 +143,7 @@ public class PseApiServiceTests
     }
 
     [Fact]
-    public async Task GetStockPriceAsOfDateAsync_WithNoMatchingRecords_ReturnsEmptyStock()
+    public async Task GetStockPriceAsOfDateAsync_WithNoMatchingRecords_ReturnsNull()
     {
         // Arrange
         var mockQueryable = Utils.BuildMockDbSet(new List<HistoricalTradingData>());
@@ -153,14 +153,11 @@ public class PseApiServiceTests
         var result = await _service.GetStockPriceAsOfDateAsync("NONEXISTENT", DateOnly.FromDateTime(new DateTime(2026, 6, 26)));
 
         // Assert
-        result.Should().NotBeNull();
-        result.Symbol.Should().BeNull();
-        result.SecurityName.Should().BeNull();
-        result.Price.Should().BeEmpty();
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetStockPriceAsOfDateAsync_WithDateBeforeAllRecords_ReturnsEmptyStock()
+    public async Task GetStockPriceAsOfDateAsync_WithDateBeforeAllRecords_ReturnsNull()
     {
         // Arrange
         var mockQueryable = Utils.BuildMockDbSet(new[] { _mockHistoricalData1 });
@@ -170,12 +167,11 @@ public class PseApiServiceTests
         var result = await _service.GetStockPriceAsOfDateAsync("ABC", DateOnly.FromDateTime(new DateTime(2026, 6, 1)));
 
         // Assert
-        result.Should().NotBeNull();
-        result.Symbol.Should().BeNull();
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetStockPriceAsOfDateAsync_WithNullAsOfDate_ReturnsEmptyStock()
+    public async Task GetStockPriceAsOfDateAsync_WithNullAsOfDate_ReturnsNull()
     {
         // Arrange
         var mockQueryable = Utils.BuildMockDbSet(new[] { _mockHistoricalData1 });
@@ -185,8 +181,7 @@ public class PseApiServiceTests
         var result = await _service.GetStockPriceAsOfDateAsync("ABC", null);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Symbol.Should().BeNull();
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -231,7 +226,7 @@ public class PseApiServiceTests
     }
 
     [Fact]
-    public async Task GetStockLatestPriceAsync_WithNonExistentSymbol_ReturnsEmptyStock()
+    public async Task GetStockLatestPriceAsync_WithNonExistentSymbol_ReturnsNull()
     {
         // Arrange
         _pseClient.GetStocks().Returns(Task.FromResult<IEnumerable<StockFromFrames>>(new[] { _mockStockFromFrames }));
@@ -240,14 +235,11 @@ public class PseApiServiceTests
         var result = await _service.GetStockLatestPriceAsync("NONEXISTENT");
 
         // Assert
-        result.Should().NotBeNull();
-        result.Symbol.Should().BeNull();
-        result.SecurityName.Should().BeNull();
-        result.Price.Should().BeEmpty();
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetStockLatestPriceAsync_WithEmptyStocksList_ReturnsEmptyStock()
+    public async Task GetStockLatestPriceAsync_WithEmptyStocksList_ReturnsNull()
     {
         // Arrange
         _pseClient.GetStocks().Returns(Task.FromResult<IEnumerable<StockFromFrames>>(Array.Empty<StockFromFrames>()));
@@ -256,8 +248,7 @@ public class PseApiServiceTests
         var result = await _service.GetStockLatestPriceAsync("ANY");
 
         // Assert
-        result.Should().NotBeNull();
-        result.Symbol.Should().BeNull();
+        result.Should().BeNull();
     }
 
     [Fact]

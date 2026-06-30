@@ -16,7 +16,7 @@ public class PseApiService : IPseApiService
         _appDbContext = appDbContext;
     }
 
-    public async Task<Stock> GetStockPriceAsOfDateAsync(string symbol, DateOnly? asOfDate)
+    public async Task<Stock?> GetStockPriceAsOfDateAsync(string symbol, DateOnly? asOfDate)
     {
         var historicalTradingData = await _appDbContext.HistoricalTradingData
             .AsNoTracking()
@@ -26,13 +26,13 @@ public class PseApiService : IPseApiService
             .ThenByDescending(x => x.Created)
             .FirstOrDefaultAsync();
 
-        var stock = historicalTradingData == null ? new Stock() : Mappers.ManualMapper.MapToStock(historicalTradingData);
+        var stock = historicalTradingData == null ? null : Mappers.ManualMapper.MapToStock(historicalTradingData);
         return stock;
     }
 
-    public async Task<Stock> GetStockLatestPriceAsync(string symbol)
+    public async Task<Stock?> GetStockLatestPriceAsync(string symbol)
     {
-        var result = new Stock();
+        Stock? result = null;
         var stockData = await _client.GetStocks();
         var stock = stockData.FirstOrDefault(x => x.StockSymbol == symbol);
         if (stock != null)
