@@ -369,3 +369,5 @@ FodyWeavers.xsd
 *.env.local
 .env.*
 **/.env
+
+**/data

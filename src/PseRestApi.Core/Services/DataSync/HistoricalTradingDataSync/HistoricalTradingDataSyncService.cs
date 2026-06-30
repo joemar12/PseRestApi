@@ -21,27 +21,16 @@ public class HistoricalTradingDataSyncService : BaseSyncService<HistoricalTradin
             .WithTargetTable("HistoricalTradingData")
             .WithColumnMappings(new Dictionary<string, string>()
             {
-                { "Id", "Id" },
                 { "SecurityId", "SecurityId" },
                 { "Symbol", "Symbol" },
                 { "Currency", "Currency" },
-                { "SqPrevious", "SqPrevious" },
-                { "SqOpen", "SqOpen" },
-                { "SqHigh", "SqHigh" },
-                { "SqLow", "SqLow" },
-                { "FiftyTwoWeekHigh", "FiftyTwoWeekHigh" },
-                { "FiftyTwoWeekLow", "FiftyTwoWeekLow" },
-                { "ChangeClose", "ChangeClose" },
-                { "PercChangeClose", "PercChangeClose" },
-                { "ChangeClosePercChangeClose", "ChangeClosePercChangeClose" },
-                { "AvgPrice", "AvgPrice" },
-                { "LastTradePrice", "LastTradePrice" },
-                { "LastTradedDate", "LastTradedDate" },
-                { "CurrentPe", "CurrentPe" },
-                { "TotalValue", "TotalValue" },
-                { "TotalVolume", "TotalVolume" },
+                { "Change", "Change" },
+                { "PercentChange", "PercentChange" },
+                { "Price", "Price" },
+                { "TradeDate", "TradeDate" },
+                { "Value", "Value" },
+                { "Volume", "Volume" },
                 { "Created", "Created" },
-                { "LastModified", "LastModified" }
             })
         );
     }

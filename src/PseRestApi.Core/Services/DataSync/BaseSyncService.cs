@@ -61,14 +61,15 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
             if (connection != null)
             {
                 var sourceTable = bulkInsertData.ToDataTable();
-                var columnNames = sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
+                var columnNames = _options.ColumnMappings?.Select(m => m.Value).ToList() ?? sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
                 try
                 {
                     await using var npgsqlConnection = connection as NpgsqlConnection ?? throw new InvalidOperationException("Connection is not an NpgsqlConnection");
                     await npgsqlConnection.OpenAsync();
                     var targetTable = _options.TargetTable?.Replace("dbo.", "");
+                    var joinedColumnNames = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
                     await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync(
-                        $"COPY {targetTable} ({string.Join(", ", columnNames)}) FROM STDIN (FORMAT BINARY)");
+                        $"COPY \"{targetTable}\" ({joinedColumnNames}) FROM STDIN (FORMAT BINARY)");
                     foreach (DataRow row in sourceTable.Rows)
                     {
                         await copyWriter.StartRowAsync();

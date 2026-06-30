@@ -28,8 +28,8 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
     {
         var sql = $$"""
                     DELETE
-                    FROM SyncBatchData
-                    WHERE BatchId = @BatchId
+                    FROM "SyncBatchData"
+                    WHERE "BatchId" = @BatchId
                     """;
         return sql;
     }
@@ -37,25 +37,24 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
     private string MergeCommand()
     {
         var sql = $$"""
-                  INSERT INTO SecurityInfo (Symbol, CompanyId, CompanyName, SecurityStatus, SecurityName, Created, LastModified)
+                  INSERT INTO "SecurityInfo" ("Symbol", "CompanyId", "CompanyName", "SecurityStatus", "SecurityName", "Created", "LastModified")
                   SELECT DISTINCT
-                  			Data->>'SecurityId'::text,
-                  			Data->>'Symbol'::text,
-                  			Data->>'CompanyId'::text,
-                  			Data->>'CompanyName'::text,
-                  			Data->>'SecurityStatus'::text,
-                  			Data->>'SecurityName'::text,
-                  			NOW(),
-                  			NOW()
-                  FROM SyncBatchData
-                  WHERE BatchId = @BatchId
-                  ON CONFLICT (Symbol) DO UPDATE SET
-                  		Symbol = EXCLUDED.Symbol,
-                  		CompanyId = EXCLUDED.CompanyId,
-                  		CompanyName = EXCLUDED.CompanyName,
-                  		SecurityStatus = EXCLUDED.SecurityStatus,
-                  		SecurityName = EXCLUDED.SecurityName,
-                  		LastModified = NOW()
+                      ("Data"::jsonb)->>'Symbol',
+                      (("Data"::jsonb)->>'CompanyId')::int,
+                      ("Data"::jsonb)->>'CompanyName',
+                      ("Data"::jsonb)->>'SecurityStatus',
+                      ("Data"::jsonb)->>'SecurityName',
+                      NOW(),
+                      NOW()
+                  FROM "SyncBatchData"
+                  WHERE "BatchId" = @BatchId
+                  ON CONFLICT ("Symbol") DO UPDATE SET
+                      "Symbol" = EXCLUDED."Symbol",
+                      "CompanyId" = EXCLUDED."CompanyId",
+                      "CompanyName" = EXCLUDED."CompanyName",
+                      "SecurityStatus" = EXCLUDED."SecurityStatus",
+                      "SecurityName" = EXCLUDED."SecurityName",
+                      "LastModified" = NOW();
                   """;
         return sql;
     }

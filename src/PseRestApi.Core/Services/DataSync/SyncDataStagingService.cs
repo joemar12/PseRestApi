@@ -41,16 +41,16 @@ public class SyncDataStagingService : ISyncDataStagingService
         if (connection != null)
         {
             var sourceTable = syncBatchItems.ToDataTable();
-            var columnNames = sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
+            var columnNames = sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).Skip(1).ToArray();
             try
             {
                 await using var npgsqlConnection = connection as NpgsqlConnection ?? throw new InvalidOperationException("Connection is not an NpgsqlConnection");
                 await npgsqlConnection.OpenAsync();
-                await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync("COPY SyncBatchData (Id, BatchId, Data, Created, LastModified) FROM STDIN (FORMAT BINARY)");
+                var joinedColumnNames = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
+                await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync($"COPY \"SyncBatchData\" ({joinedColumnNames})  FROM STDIN (FORMAT BINARY)");
                 foreach (DataRow row in sourceTable.Rows)
                 {
                     await copyWriter.StartRowAsync();
-                    await copyWriter.WriteAsync(row["Id"]);
                     await copyWriter.WriteAsync(row["BatchId"]);
                     await copyWriter.WriteAsync(row["Data"] ?? DBNull.Value);
                     await copyWriter.WriteAsync(row["Created"] ?? DBNull.Value);
