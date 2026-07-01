@@ -47,31 +47,60 @@ public class PseApiService : IPseApiService
         var pageNumber = queryParams.PageNumber ?? 1;
         var pageSize = queryParams.PageSize ?? 10;
 
-        var query = _appDbContext.HistoricalTradingData
+        var baseFilter = _appDbContext.HistoricalTradingData
             .AsNoTracking()
-            .Include(x => x.SecurityInfo)
             .Where(h => h.Symbol == stockSymbol
                 && h.TradeDate != null
                 && h.TradeDate >= queryParams.StartDate
-                && (queryParams.EndDate == null || h.TradeDate <= queryParams.EndDate))
-            .GroupBy(x => x.TradeDate)
-            .Select(g => g.OrderByDescending(x => x.TradeDate).FirstOrDefault())
-            .Where(x => x != null);
+                && (queryParams.EndDate == null || h.TradeDate <= queryParams.EndDate));
+
+        // Step 1: latest Created timestamp per TradeDate
+        var latestCreatedPerDate = baseFilter
+            .GroupBy(h => h.TradeDate)
+            .Select(g => new
+            {
+                TradeDate = g.Key,
+                LatestCreated = g.Max(x => x.Created)
+            });
+
+        // Step 2: among rows sharing that (TradeDate, Created) pair, pick the max Id
+        var latestPerDate =
+            from h in baseFilter
+            join l in latestCreatedPerDate
+                on new { h.TradeDate, Created = h.Created } equals new { l.TradeDate, Created = l.LatestCreated }
+            group h by new { h.TradeDate, h.Created } into g
+            select new
+            {
+                g.Key.TradeDate,
+                g.Key.Created,
+                LatestId = g.Max(x => x.Id)
+            };
+
+        // Step 3: join back to get the actual full row for each (TradeDate, Created, Id) triple
+        var query =
+            from h in _appDbContext.HistoricalTradingData.AsNoTracking()
+            join l in latestPerDate
+                on new { h.TradeDate, h.Created, h.Id } equals new { l.TradeDate, l.Created, Id = l.LatestId }
+            select new
+            {
+                Historical = h,
+                Security = h.SecurityInfo
+            };
 
         var pageItems = await query
-            .OrderBy(x => x.TradeDate)
+            .OrderBy(x => x.Historical.TradeDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new Stock
             {
-                SecurityName = x.SecurityInfo == null ? "" : x.SecurityInfo.SecurityName,
-                PercentChange = x.PercentChange ?? 0,
-                Volume = x.Volume ?? 0,
-                AsOfDate = x.TradeDate,
-                Symbol = x.Symbol,
+                SecurityName = x.Security == null ? "" : x.Security.SecurityName,
+                PercentChange = x.Historical.PercentChange ?? 0,
+                Volume = x.Historical.Volume ?? 0,
+                AsOfDate = x.Historical.TradeDate,
+                Symbol = x.Historical.Symbol,
                 Price = new List<StockPrice>
                 {
-                    new StockPrice { Currency = x.Currency, Price = x.Price ?? 0 }
+            new StockPrice { Currency = x.Historical.Currency, Price = x.Historical.Price ?? 0 }
                 }
             })
             .ToListAsync();
