@@ -17,7 +17,7 @@ public static class DependencyInjection
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseSqlServer(
+            options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnectionString") ?? string.Empty,
                 builder => builder.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
         });

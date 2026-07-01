@@ -71,10 +71,12 @@ services:
 
 secrets:
   db_connection_string:
-    file: ./secrets/db_connection_string.txt
+    file: ./secrets/db_connection_string_pg.txt
   certificate_pfx:
     file: ./certs/certificate.pfx
 
 networks:
   pse_network:
+    external: true
     driver: bridge
+    name: pse_network

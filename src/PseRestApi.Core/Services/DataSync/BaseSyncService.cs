@@ -1,7 +1,8 @@
 ﻿using Dapper;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using PseRestApi.Core.Common;
+using System.Data;
 
 namespace PseRestApi.Core.Services.DataSync;
 
@@ -59,20 +60,26 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
             using var connection = _connectionProvider.CreateConnection();
             if (connection != null)
             {
-                using var bulkCopier = new SqlBulkCopy(connection as SqlConnection);
                 var sourceTable = bulkInsertData.ToDataTable();
-                bulkCopier.DestinationTableName = _options.TargetTable;
+                var columnNames = _options.ColumnMappings?.Select(m => m.Value).ToList() ?? sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
                 try
                 {
-                    if (_options.ColumnMappings != null && _options.ColumnMappings.Count > 0)
+                    await using var npgsqlConnection = connection as NpgsqlConnection ?? throw new InvalidOperationException("Connection is not an NpgsqlConnection");
+                    await npgsqlConnection.OpenAsync();
+                    var targetTable = _options.TargetTable?.Replace("dbo.", "");
+                    var joinedColumnNames = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
+                    await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync(
+                        $"COPY \"{targetTable}\" ({joinedColumnNames}) FROM STDIN (FORMAT BINARY)");
+                    foreach (DataRow row in sourceTable.Rows)
                     {
-                        foreach (var mapping in _options.ColumnMappings)
+                        await copyWriter.StartRowAsync();
+                        foreach (var columnName in columnNames)
                         {
-                            bulkCopier.ColumnMappings.Add(mapping.Key, mapping.Value);
+                            var value = row[columnName];
+                            await copyWriter.WriteAsync(value == DBNull.Value ? null : value);
                         }
                     }
-                    connection.Open();
-                    await bulkCopier.WriteToServerAsync(sourceTable);
+                    await copyWriter.CompleteAsync();
                 }
                 catch (Exception ex)
                 {

@@ -24,12 +24,12 @@ public static class ManualMapper
         return new HistoricalTradingData
         {
             Symbol = src.StockSymbol,
-            TotalVolume = src.Volume,
-            TotalValue = double.TryParse(src.Value, out var value) ? value : null,
-            ChangeClose = double.TryParse(src.Change, out var change) ? change : null,
-            LastTradePrice = double.TryParse(src.Price, out var price) ? price : null,
-            PercChangeClose = double.TryParse(src.PercentChange, out var percentChange) ? percentChange : null,
-            LastTradedDate = DateTime.Now,
+            Volume = src.Volume,
+            Value = double.TryParse(src.Value, out var value) ? value : null,
+            Change = double.TryParse(src.Change, out var change) ? change : null,
+            Price = double.TryParse(src.Price, out var price) ? price : null,
+            PercentChange = double.TryParse(src.PercentChange, out var percentChange) ? percentChange : null,
+            TradeDate = DateOnly.FromDateTime(DateTime.Now),
             Currency = "PHP",
         };
     }
@@ -39,13 +39,13 @@ public static class ManualMapper
         var dest = new Stock
         {
             SecurityName = src.SecurityInfo?.SecurityName,
-            PercentChange = src.PercChangeClose ?? 0,
-            Volume = src.TotalVolume ?? 0,
-            AsOfDate = src.LastTradedDate,
+            PercentChange = src.PercentChange ?? 0,
+            Volume = src.Volume ?? 0,
+            AsOfDate = src.TradeDate,
             Symbol = src.Symbol,
             Price = new List<StockPrice>
             {
-                new StockPrice { Currency = src.Currency, Price = src.LastTradePrice ?? 0 }
+                new StockPrice { Currency = src.Currency, Price = src.Price ?? 0 }
             }
         };
         return dest;
@@ -57,7 +57,7 @@ public static class ManualMapper
         {
             SecurityName = src.StockName,
             Symbol = src.StockSymbol,
-            AsOfDate = DateTime.Now,
+            AsOfDate = DateOnly.FromDateTime(DateTime.Now),
             PercentChange = double.TryParse(src.PercentChange, NumberStyles.Any, CultureInfo.InvariantCulture, out var pc) ? pc : 0,
             Volume = src.Volume
         };

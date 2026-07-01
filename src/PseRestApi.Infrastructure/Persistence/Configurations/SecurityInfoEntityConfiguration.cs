@@ -9,9 +9,6 @@ public class SecurityInfoEntityConfiguration : IEntityTypeConfiguration<Security
     public void Configure(EntityTypeBuilder<SecurityInfo> builder)
     {
         builder
-            .ToTable("SecurityInfo");
-
-        builder
             .HasKey(x => x.SecurityId);
 
         builder
