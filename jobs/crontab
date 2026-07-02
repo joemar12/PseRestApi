@@ -1,2 +1,2 @@
-# runs every 7pm mondays-fridays
-0 19 * * 1-5 docker start sync >> /var/log/cron.log 2>&1
+# runs every 11am utc (7pm ph time) mondays-fridays
+0 11 * * 1-5 docker start sync >> /var/log/cron.log 2>&1
