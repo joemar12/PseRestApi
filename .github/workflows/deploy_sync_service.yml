@@ -23,11 +23,13 @@ jobs:
         run: echo "TAG=$(date +'%Y%m%d')-${GITHUB_SHA}" >> $GITHUB_ENV
 
       - name: Build image
-        run: docker build -f Dockerfile.Sync \
-              -t ghcr.io/${{ github.repository }}/pse-stockprice-scraper:latest \
-              -t ghcr.io/${{ github.repository }}/pse-stockprice-scraper:${{ env.TAG }} .
+        run: |
+          docker build -f Dockerfile.Sync \
+              -t ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:latest \
+              -t ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:${{ env.TAG }} \
+              .
 
       - name: Push images
         run: |
-          docker push ghcr.io/${{ github.repository }}/pse-stockprice-scraper:latest
-          docker push ghcr.io/${{ github.repository }}/pse-stockprice-scraper:${{ env.TAG }}
+          docker push ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:latest
+          docker push ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:${{ env.TAG }}
