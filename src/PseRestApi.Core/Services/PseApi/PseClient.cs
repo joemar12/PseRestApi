@@ -26,15 +26,15 @@ public class PseClient : IPseClient
     {
         var client = _httpClientFactory.CreateClient(Constants.PseFramesClientName);
         using var req = new HttpRequestMessage(HttpMethod.Get, string.Empty);
-        if (!string.IsNullOrEmpty(Options.Referer))
+        if (!string.IsNullOrEmpty(Options.Referrer))
         {
-            if (Uri.TryCreate(Options.Referer, UriKind.Absolute, out var refUri))
+            if (Uri.TryCreate(Options.Referrer, UriKind.Absolute, out var refUri))
             {
                 req.Headers.Referrer = refUri;
             }
             else
             {
-                req.Headers.Add("Referer", Options.Referer);
+                req.Headers.Add("Referer", Options.Referrer);
             }
         }
         using var resp = await client.SendAsync(req);
