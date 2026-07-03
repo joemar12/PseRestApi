@@ -1,34 +1,37 @@
 name: Build and Publish Stock Price Scraper Image
-
 on:
-  push:
-    branches:
-      - main   # only trigger on merge/push to main
-  workflow_dispatch: # manual trigger
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for manual build'
+        required: false
+        default: 'manual'
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     environment: production
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Set version tag
         id: vars
-        run: echo "TAG=$(date +'%Y%m%d')-${GITHUB_SHA}" >> $GITHUB_ENV
-
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          else
+            echo "TAG=${{ github.event.inputs.tag }}-$(date +'%Y%m%d')-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          fi
       - name: Build image
         run: |
           docker build -f Dockerfile.Sync \
               -t ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:latest \
               -t ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:${{ env.TAG }} \
               .
-
       - name: Push images
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/pserestapi/pse-stockprice-scraper:latest
