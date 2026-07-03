@@ -1,3 +1,4 @@
+[![CI Build](https://github.com/joemar12/PseRestApi/actions/workflows/main.yml/badge.svg)](https://github.com/joemar12/PseRestApi/actions/workflows/main.yml) [![Build and Publish Stock Price Scraper Image](https://github.com/joemar12/PseRestApi/actions/workflows/deploy_sync_service.yml/badge.svg)](https://github.com/joemar12/PseRestApi/actions/workflows/deploy_sync_service.yml)
 # PseRestApi
 
 A REST API for querying Philippine Stock Exchange (PSE) stock price data. This application provides endpoints to retrieve the 
