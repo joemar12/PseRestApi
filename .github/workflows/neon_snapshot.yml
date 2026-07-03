@@ -1,0 +1,85 @@
+name: Monthly Neon Snapshot
+
+on:
+  schedule:
+    # Runs at 03:00 UTC on the 1st of every month.
+    - cron: '0 3 1 * *'
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab too
+
+jobs:
+  rotate-snapshot:
+    runs-on: ubuntu-latest
+    environment: production   # so it picks up your "production" environment secrets/vars
+    steps:
+      - name: Delete previous snapshot (if any)
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+
+          response=$(curl -sS -w "\n%{http_code}" \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/snapshots" \
+            -H "Authorization: Bearer ${NEON_API_KEY}")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "List snapshots HTTP status: $http_code"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::Failed to list snapshots (status $http_code): $body"
+            exit 1
+          fi
+
+          # Free plan only allows 1 manual snapshot, so this just grabs the first/only one.
+          snapshot_id=$(echo "$body" | jq -r '.snapshots[0].snapshot.id // empty')
+
+          if [ -z "$snapshot_id" ]; then
+            echo "No existing snapshot found, nothing to delete."
+            exit 0
+          fi
+
+          echo "Deleting existing snapshot: $snapshot_id"
+
+          del_response=$(curl -sS -w "\n%{http_code}" -X DELETE \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/snapshots/${snapshot_id}" \
+            -H "Authorization: Bearer ${NEON_API_KEY}")
+
+          del_http_code=$(echo "$del_response" | tail -n1)
+          del_body=$(echo "$del_response" | sed '$d')
+
+          echo "Delete HTTP status: $del_http_code"
+
+          if [ "$del_http_code" -lt 200 ] || [ "$del_http_code" -ge 300 ]; then
+            echo "::error::Failed to delete existing snapshot (status $del_http_code): $del_body"
+            exit 1
+          fi
+
+          echo "Previous snapshot deleted successfully."
+
+      - name: Create new snapshot
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+          NEON_BRANCH_ID: ${{ vars.NEON_BRANCH_ID }}
+        run: |
+          set -euo pipefail
+
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches/${NEON_BRANCH_ID}/snapshot" \
+            -H "Authorization: Bearer ${NEON_API_KEY}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "HTTP status: $http_code"
+          echo "Response body: $body"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::Neon snapshot creation failed with status $http_code"
+            exit 1
+          fi
+
+          echo "Snapshot triggered successfully."
