@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\src\PseRestApi.Host\PseRestApi.Host.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IntegrationTests\" />
+  </ItemGroup>
+
 </Project>

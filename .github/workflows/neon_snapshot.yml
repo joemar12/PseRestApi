@@ -4,12 +4,12 @@ on:
   schedule:
     # Runs at 03:00 UTC on the 1st of every month.
     - cron: '0 3 1 * *'
-  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab too
+  workflow_dispatch: {}
 
 jobs:
   rotate-snapshot:
     runs-on: ubuntu-latest
-    environment: production   # so it picks up your "production" environment secrets/vars
+    environment: production
     steps:
       - name: Delete previous snapshot (if any)
         env:
@@ -82,4 +82,4 @@ jobs:
             exit 1
           fi
 
-          echo "Snapshot triggered successfully."
+          echo "Snapshot creation triggered successfully."
