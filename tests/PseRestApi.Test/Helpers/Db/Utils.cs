@@ -28,7 +28,7 @@ public static class Utils
             ((IQueryable<TEntity>)mockSet).Expression.Returns(queryable.Expression);
             ((IQueryable<TEntity>)mockSet).ElementType.Returns(queryable.ElementType);
             ((IQueryable<TEntity>)mockSet).GetEnumerator().Returns(info => data.GetEnumerator());
-            
+
             mockSet.AsAsyncEnumerable().Returns(args => CreateAsyncMock(data));
         }
 

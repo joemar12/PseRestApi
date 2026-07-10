@@ -15,7 +15,7 @@ public class OptionsBuilderTests
         var cleanupCommand = "cleanup";
         var batchID = Guid.NewGuid();
         var options = builder
-            .WithStaging()
+            .WithSkipStaging(false)
             .WithMergeCommand(command)
             .WithCleanupCommand(cleanupCommand)
             .WithBatchId(batchID)
@@ -39,7 +39,7 @@ public class OptionsBuilderTests
         var targetTable = "test";
         var columnMappings = new Dictionary<string, string>() { { "test", "test" } };
         var options = builder
-            .SkipStaging()
+            .WithSkipStaging(true)
             .WithTargetTable(targetTable)
             .WithColumnMappings(columnMappings)
             .Build();
@@ -51,7 +51,8 @@ public class OptionsBuilderTests
             options.ColumnMappings.Should().BeEquivalentTo(columnMappings);
             options.MergeCommand.Should().BeNullOrEmpty();
             options.CleanupCommand.Should().BeNullOrEmpty();
-            options.BatchId.Should().BeEmpty();
+            // BatchId defaults to Guid.NewGuid() when not explicitly set
+            options.BatchId.Should().NotBeEmpty();
         }
     }
 }

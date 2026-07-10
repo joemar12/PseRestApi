@@ -1,11 +1,11 @@
+using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host.Controllers;
 using Xunit;
-using NSubstitute;
-using AwesomeAssertions;
 
 namespace PseRestApi.Test.UnitTests.Controllers;
 

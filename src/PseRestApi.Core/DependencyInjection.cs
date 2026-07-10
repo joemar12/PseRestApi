@@ -29,7 +29,17 @@ public static class DependencyInjection
             .AddTransient<IHistoricalTradingDataSyncDataProvider, HistoricalTradingDataSyncDataProvider>()
             .AddTransient<ISecurityInfoSyncDataProvider, SecurityInfoSyncDataProvider>()
             .AddTransient<ISecurityInfoDataSyncService, SecurityInfoDataSyncService>()
-            .AddTransient<IHistoricalTradingDataSyncService, HistoricalTradingDataSyncService>();
+            .AddTransient<IHistoricalTradingDataSyncService, HistoricalTradingDataSyncService>()
+            .AddTransient<IBulkCopyService, NpgsqlBulkCopyService>()
+            // Register both strategies (they have different dependencies, no conflict)
+            .AddTransient<StagedSyncStrategy>()
+            .AddTransient<DirectBulkCopyStrategy>()
+            // Register the factory that selects between them
+            .AddTransient<ISyncStrategyFactory, SyncStrategyFactory>()
+            // Register options providers with keyed services (.NET 10)
+            .AddKeyedScoped<ISyncOptionsProvider, SecurityInfoSyncOptionsProvider>("SecurityInfo")
+            .AddKeyedScoped<ISyncOptionsProvider, HistoricalTradingDataSyncOptionsProvider>("HistoricalTradingData");
+
         return services;
     }
 }

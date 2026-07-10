@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Http;
 using Xunit;
 
 namespace PseRestApi.IntegrationTests;

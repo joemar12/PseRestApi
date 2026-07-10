@@ -1,61 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
-using PseRestApi.Core.Common;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.SecurityInfoSync;
 
 public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecurityInfoDataSyncService
 {
+    private readonly IServiceProvider _serviceProvider;
+
     public SecurityInfoDataSyncService(
         ISecurityInfoSyncDataProvider syncDataProvider,
-        ISyncDataStagingService syncDataStagingService,
-        IDbConnectionProvider connectionProvider,
-        ILogger<SecurityInfoDataSyncService> logger) : base(syncDataProvider, syncDataStagingService, connectionProvider, logger)
+        ISyncStrategyFactory strategyFactory,
+        IServiceProvider serviceProvider,
+        ILogger<SecurityInfoDataSyncService> logger)
+        : base(syncDataProvider, strategyFactory, logger)
     {
+        _serviceProvider = serviceProvider;
     }
 
-    public override async Task Sync()
+    public override Task Sync()
     {
-        await Sync(options =>
-            options
-            .WithStaging()
-            .WithMergeCommand(MergeCommand())
-            .WithCleanupCommand(CleanupCommand())
-        );
-    }
-
-    private string CleanupCommand()
-    {
-        var sql = $$"""
-                    DELETE
-                    FROM "SyncBatchData"
-                    WHERE "BatchId" = @BatchId
-                    """;
-        return sql;
-    }
-
-    private string MergeCommand()
-    {
-        var sql = $$"""
-                  INSERT INTO "SecurityInfo" ("Symbol", "CompanyId", "CompanyName", "SecurityStatus", "SecurityName", "Created", "LastModified")
-                  SELECT DISTINCT
-                      ("Data"::jsonb)->>'Symbol',
-                      (("Data"::jsonb)->>'CompanyId')::int,
-                      ("Data"::jsonb)->>'CompanyName',
-                      ("Data"::jsonb)->>'SecurityStatus',
-                      ("Data"::jsonb)->>'SecurityName',
-                      NOW(),
-                      NOW()
-                  FROM "SyncBatchData"
-                  WHERE "BatchId" = @BatchId
-                  ON CONFLICT ("Symbol") DO UPDATE SET
-                      "Symbol" = EXCLUDED."Symbol",
-                      "CompanyId" = EXCLUDED."CompanyId",
-                      "CompanyName" = EXCLUDED."CompanyName",
-                      "SecurityStatus" = EXCLUDED."SecurityStatus",
-                      "SecurityName" = EXCLUDED."SecurityName",
-                      "LastModified" = NOW();
-                  """;
-        return sql;
+        var provider = _serviceProvider.GetKeyedService<ISyncOptionsProvider>("SecurityInfo");
+        return provider == null
+            ? throw new InvalidOperationException("No ISyncOptionsProvider registered for SecurityInfo.")
+            : SyncAsync(provider.GetOptions());
     }
 }
