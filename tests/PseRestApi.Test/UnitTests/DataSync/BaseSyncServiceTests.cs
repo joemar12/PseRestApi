@@ -133,9 +133,11 @@ public class BaseSyncServiceTests
 
         // Assert
         caughtException.Should().NotBeNull();
-        caughtException.Should().BeOfType<InvalidOperationException>();
-        caughtException!.Message.Should().Be("bulk copy failed");
-        // The strategy rethrows without logging the exception, so no errors are captured
+        caughtException.Should().BeOfType<OrchestrationException>();
+        caughtException.InnerException.Should().BeOfType<InvalidOperationException>();
+        caughtException.InnerException!.Message.Should().Be("bulk copy failed");
+        // The orchestration layer logs the unexpected exception
+        capturingLogger.CapturedErrors.Should().Contain(ex => ex is InvalidOperationException);
     }
 
     [Fact]

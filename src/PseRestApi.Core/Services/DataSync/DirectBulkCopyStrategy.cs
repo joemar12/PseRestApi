@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Logging;
-using PseRestApi.Core.Common;
-using System.Data;
 
 namespace PseRestApi.Core.Services.DataSync;
 
@@ -15,14 +13,18 @@ public class DirectBulkCopyStrategy : ISyncStrategy
 
     public async Task ExecuteAsync<T>(IAsyncEnumerable<T> syncData, DataSyncOptions options, ILogger logger) where T : class
     {
-        var bulkInsertData = await syncData.ToListAsync();
-
-        var sourceTable = bulkInsertData.ToDataTable();
-        var columnNames = options.ColumnMappings?.Select(m => m.Value).ToList()
-            ?? sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
-
-        var records = sourceTable.AsEnumerable().Select(row => new DataRowDataRecordAdapter(row));
-        await _bulkCopyService.CopyAsync(options.TargetTable ?? string.Empty, columnNames, records);
-        logger.LogDebug("Direct bulk copy completed for {EntityType} to table {TargetTable}", typeof(T).Name, options.TargetTable);
+        try
+        {
+            await _bulkCopyService.CopyAsync<T>(options.TargetTable ?? string.Empty, syncData, options);
+            logger.LogDebug("Direct bulk copy completed for {EntityType} to table {TargetTable}", typeof(T).Name, options.TargetTable);
+        }
+        catch (DataSyncException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new SyncStrategyException($"Direct bulk copy failed for {typeof(T).Name} to table {options.TargetTable}", ex);
+        }
     }
 }

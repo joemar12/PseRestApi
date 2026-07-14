@@ -2,6 +2,7 @@
 using PseRestApi.Core.Common.Interfaces;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Domain.Entities;
+using PseRestApi.Core.ResponseModels;
 
 namespace PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
 
@@ -18,11 +19,34 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
 
     public async IAsyncEnumerable<HistoricalTradingData> GetSyncData()
     {
-        //eagerly fetch all security info
-        var allSecurityInfo = await _appDbContext.SecurityInfo.ToListAsync();
-        var allStocksFromFrames = await _pseClient.GetStocks();
-        var timeNow = DateTime.UtcNow;
+        // Fetch data outside of try/yield block
+        SecurityInfo[] allSecurityInfo;
+        IEnumerable<StockFromFrames> allStocksFromFrames;
+        DateTime timeNow;
 
+        try
+        {
+            // eagerly fetch all security info with retry
+            allSecurityInfo = (await DataSyncRetryPolicy.ExecuteAsync(
+                async () => await _appDbContext.SecurityInfo.ToListAsync(),
+                "fetch security info")).ToArray();
+
+            allStocksFromFrames = (await DataSyncRetryPolicy.ExecuteAsync(
+                async () => await _pseClient.GetStocks(),
+                "fetch stocks from PSE API")).ToArray();
+
+            timeNow = DateTime.UtcNow;
+        }
+        catch (DataProviderException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new DataProviderException("Failed to fetch historical trading data", ex);
+        }
+
+        // Now yield outside of try block
         foreach (var securityInfo in allSecurityInfo)
         {
             if (!string.IsNullOrEmpty(securityInfo.Symbol))

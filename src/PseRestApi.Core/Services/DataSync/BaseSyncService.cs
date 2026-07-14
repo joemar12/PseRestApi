@@ -28,8 +28,21 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
         _logger.LogDebug("Starting sync for {EntityType} with strategy {StrategyType}",
             typeof(T).Name, strategy.GetType().Name);
 
-        await strategy.ExecuteAsync<T>(syncData, options, _logger);
-
-        _logger.LogDebug("Sync completed for {EntityType}", typeof(T).Name);
+        try
+        {
+            await strategy.ExecuteAsync<T>(syncData, options, _logger);
+            _logger.LogDebug("Sync completed for {EntityType}", typeof(T).Name);
+        }
+        catch (DataSyncException ex)
+        {
+            _logger.LogError(ex, "Sync failed for {EntityType} with strategy {StrategyType}: {Message}",
+                typeof(T).Name, strategy.GetType().Name, ex.Message);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected sync failure for {EntityType}", typeof(T).Name);
+            throw new OrchestrationException($"Sync failed for {typeof(T).Name}", ex);
+        }
     }
 }
