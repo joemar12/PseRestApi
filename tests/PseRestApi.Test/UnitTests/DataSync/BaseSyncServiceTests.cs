@@ -25,7 +25,7 @@ internal sealed class CapturingLogger<T> : ILogger<T>, IDisposable
 
     public bool IsEnabled(LogLevel logLevel) => true;
 
-    public IDisposable BeginScope<TState>(TState state) => null!;
+    IDisposable ILogger.BeginScope<TState>(TState state) => null!;
     public void Dispose() { }
 }
 
@@ -57,7 +57,7 @@ public class BaseSyncServiceTests
             mockLogger);
 
         // Act
-        await service.Sync();
+        await service.RunAsync();
 
         // Assert
         await directStrategy.Received(1).ExecuteAsync(
@@ -88,7 +88,7 @@ public class BaseSyncServiceTests
         Exception? exception = null;
         try
         {
-            await service.Sync();
+            await service.RunAsync();
         }
         catch (Exception ex)
         {
@@ -124,7 +124,7 @@ public class BaseSyncServiceTests
         Exception? caughtException = null;
         try
         {
-            await service.Sync();
+            await service.RunAsync();
         }
         catch (Exception ex)
         {
@@ -159,7 +159,7 @@ public class BaseSyncServiceTests
             mockLogger);
 
         // Act
-        await service.Sync();
+        await service.RunAsync();
 
         // Assert
         await directStrategy.Received(1).ExecuteAsync(Arg.Any<IAsyncEnumerable<HistoricalTradingData>>(), Arg.Any<DataSyncOptions>(), Arg.Any<ILogger>());
@@ -188,7 +188,7 @@ public class BaseSyncServiceTests
             mockLogger);
 
         // Act
-        await service.Sync();
+        await service.RunAsync();
 
         // Assert
         await stagedStrategy.Received(1).ExecuteAsync(Arg.Any<IAsyncEnumerable<SecurityInfo>>(), Arg.Any<DataSyncOptions>(), Arg.Any<ILogger>());

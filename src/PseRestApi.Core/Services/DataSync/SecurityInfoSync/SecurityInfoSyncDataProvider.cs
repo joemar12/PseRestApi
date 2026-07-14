@@ -15,7 +15,6 @@ public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
 
     public async IAsyncEnumerable<SecurityInfo> GetSyncData()
     {
-        // Fetch data outside of try/yield block
         StockFromFrames[] allStocks;
 
         try
@@ -33,7 +32,6 @@ public class SecurityInfoSyncDataProvider : ISecurityInfoSyncDataProvider
             throw new DataProviderException("Failed to fetch security info", ex);
         }
 
-        // Now yield outside of try block
         foreach (var stock in allStocks)
         {
             if (!string.IsNullOrEmpty(stock.StockSymbol))

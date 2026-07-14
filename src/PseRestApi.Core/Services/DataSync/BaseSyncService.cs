@@ -18,9 +18,9 @@ public abstract class BaseSyncService<T> : ISyncService where T : class
         _logger = logger;
     }
 
-    public abstract Task Sync();
+    public abstract Task RunAsync();
 
-    protected async Task SyncAsync(DataSyncOptions options)
+    protected async Task RunAsyncImpl(DataSyncOptions options)
     {
         var syncData = _syncDataProvider.GetSyncData();
         var strategy = _strategyFactory.GetStrategy(options);

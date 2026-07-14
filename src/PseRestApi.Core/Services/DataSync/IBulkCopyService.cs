@@ -2,6 +2,6 @@ namespace PseRestApi.Core.Services.DataSync;
 
 public interface IBulkCopyService
 {
-    Task CopyAsync<T>(string targetTable, IAsyncEnumerable<T> data, DataSyncOptions? options = null)
+    Task CopyAsync<T>(IAsyncEnumerable<T> data, string targetTable, IDictionary<string, string>? columnMappings = null)
         where T : class;
 }

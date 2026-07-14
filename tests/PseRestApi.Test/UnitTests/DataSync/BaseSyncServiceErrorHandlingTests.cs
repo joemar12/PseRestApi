@@ -42,7 +42,7 @@ public class BaseSyncServiceErrorHandlingTests
         Exception? caughtException = null;
         try
         {
-            await service.Sync();
+            await service.RunAsync();
         }
         catch (Exception ex)
         {
@@ -85,7 +85,7 @@ public class BaseSyncServiceErrorHandlingTests
         Exception? caughtException = null;
         try
         {
-            await service.Sync();
+            await service.RunAsync();
         }
         catch (Exception ex)
         {
@@ -118,7 +118,7 @@ public class BaseSyncServiceErrorHandlingTests
             capturingLogger);
 
         // Act
-        await service.Sync();
+        await service.RunAsync();
 
         // Assert
         capturingLogger.CapturedErrors.Should().BeEmpty();
@@ -154,7 +154,7 @@ public class BaseSyncServiceErrorHandlingTests
         Exception? caughtException = null;
         try
         {
-            await service.Sync();
+            await service.RunAsync();
         }
         catch (Exception ex)
         {

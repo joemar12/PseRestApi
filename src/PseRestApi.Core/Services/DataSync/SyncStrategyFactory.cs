@@ -4,29 +4,32 @@ namespace PseRestApi.Core.Services.DataSync;
 
 public class SyncStrategyFactory : ISyncStrategyFactory
 {
-    private readonly StagedSyncStrategy _stagedStrategy;
-    private readonly DirectBulkCopyStrategy _directStrategy;
-    private readonly ILogger _logger;
+    private readonly IEnumerable<ISyncStrategy> _strategies;
+    private readonly ILogger<SyncStrategyFactory> _logger;
 
     public SyncStrategyFactory(
-        StagedSyncStrategy stagedStrategy,
-        DirectBulkCopyStrategy directStrategy,
+        IEnumerable<ISyncStrategy> strategies,
         ILogger<SyncStrategyFactory> logger)
     {
-        _stagedStrategy = stagedStrategy;
-        _directStrategy = directStrategy;
+        _strategies = strategies;
         _logger = logger;
     }
 
     public ISyncStrategy GetStrategy(DataSyncOptions options)
     {
-        if (!options.SkipStaging)
+        var targetTypeName = options.SkipStaging
+            ? nameof(DirectBulkCopyStrategy)
+            : nameof(StagedSyncStrategy);
+
+        var strategy = _strategies.FirstOrDefault(s => s.GetType().Name == targetTypeName);
+        if (strategy is null)
         {
-            _logger.LogDebug("Selecting StagedSyncStrategy");
-            return _stagedStrategy;
+            var available = string.Join(", ", _strategies.Select(s => s.GetType().Name));
+            throw new InvalidOperationException(
+                $"No strategy found for '{targetTypeName}'. Available strategies: {available}");
         }
 
-        _logger.LogDebug("Selecting DirectBulkCopyStrategy");
-        return _directStrategy;
+        _logger.LogDebug("Selecting {StrategyName}", targetTypeName);
+        return strategy;
     }
 }

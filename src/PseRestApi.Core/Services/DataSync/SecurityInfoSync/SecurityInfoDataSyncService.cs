@@ -18,11 +18,11 @@ public class SecurityInfoDataSyncService : BaseSyncService<SecurityInfo>, ISecur
         _serviceProvider = serviceProvider;
     }
 
-    public override Task Sync()
+    public override Task RunAsync()
     {
         var provider = _serviceProvider.GetKeyedService<ISyncOptionsProvider>("SecurityInfo");
         return provider == null
             ? throw new InvalidOperationException("No ISyncOptionsProvider registered for SecurityInfo.")
-            : SyncAsync(provider.GetOptions());
+            : RunAsyncImpl(provider.GetOptions());
     }
 }

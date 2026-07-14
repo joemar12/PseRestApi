@@ -19,7 +19,6 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
 
     public async IAsyncEnumerable<HistoricalTradingData> GetSyncData()
     {
-        // Fetch data outside of try/yield block
         SecurityInfo[] allSecurityInfo;
         IEnumerable<StockFromFrames> allStocksFromFrames;
         DateTime timeNow;
@@ -43,10 +42,9 @@ public class HistoricalTradingDataSyncDataProvider : IHistoricalTradingDataSyncD
         }
         catch (Exception ex)
         {
-            throw new DataProviderException("Failed to fetch historical trading data", ex);
+            throw new DataProviderException("Failed to fetch latest stock price data", ex);
         }
 
-        // Now yield outside of try block
         foreach (var securityInfo in allSecurityInfo)
         {
             if (!string.IsNullOrEmpty(securityInfo.Symbol))

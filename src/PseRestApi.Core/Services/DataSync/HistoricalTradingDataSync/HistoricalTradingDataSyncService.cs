@@ -18,11 +18,11 @@ public class HistoricalTradingDataSyncService : BaseSyncService<HistoricalTradin
         _serviceProvider = serviceProvider;
     }
 
-    public override Task Sync()
+    public override Task RunAsync()
     {
         var provider = _serviceProvider.GetKeyedService<ISyncOptionsProvider>("HistoricalTradingData");
         return provider == null
             ? throw new InvalidOperationException("No ISyncOptionsProvider registered for HistoricalTradingData.")
-            : SyncAsync(provider.GetOptions());
+            : RunAsyncImpl(provider.GetOptions());
     }
 }

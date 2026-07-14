@@ -15,7 +15,7 @@ public class DirectBulkCopyStrategy : ISyncStrategy
     {
         try
         {
-            await _bulkCopyService.CopyAsync<T>(options.TargetTable ?? string.Empty, syncData, options);
+            await _bulkCopyService.CopyAsync<T>(syncData, options.TargetTable ?? string.Empty, options.ColumnMappings);
             logger.LogDebug("Direct bulk copy completed for {EntityType} to table {TargetTable}", typeof(T).Name, options.TargetTable);
         }
         catch (DataSyncException)

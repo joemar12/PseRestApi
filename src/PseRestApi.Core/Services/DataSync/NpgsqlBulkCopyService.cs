@@ -18,7 +18,7 @@ public class NpgsqlBulkCopyService : IBulkCopyService
         _logger = logger;
     }
 
-    public async Task CopyAsync<T>(string targetTable, IAsyncEnumerable<T> data, DataSyncOptions? options = null)
+    public async Task CopyAsync<T>(IAsyncEnumerable<T> data, string targetTable, IDictionary<string, string>? columnMappings = null)
         where T : class
     {
         try
@@ -36,7 +36,7 @@ public class NpgsqlBulkCopyService : IBulkCopyService
 
             var targetTableName = targetTable?.Replace("dbo.", "");
 
-            var propertyMap = BuildPropertyMap(typeof(T), options?.ColumnMappings);
+            var propertyMap = BuildPropertyMap(typeof(T), columnMappings);
             var columnNames = propertyMap.Select(p => p.ColumnName).ToArray();
             var joinedColumnNames = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
 
@@ -66,7 +66,7 @@ public class NpgsqlBulkCopyService : IBulkCopyService
     }
 
     private IEnumerable<(string PropertyName, string ColumnName, PropertyInfo Property)>
-        BuildPropertyMap(Type type, Dictionary<string, string>? columnMappings)
+        BuildPropertyMap(Type type, IDictionary<string, string>? columnMappings)
     {
         var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         var propertyByName = propertyInfos.ToDictionary(p => p.Name, StringComparer.Ordinal);

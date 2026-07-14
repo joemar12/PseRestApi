@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Xunit;

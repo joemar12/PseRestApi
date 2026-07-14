@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using PseRestApi.Domain.Entities;
+﻿using PseRestApi.Domain.Entities;
 using System.Text.Json;
 
 namespace PseRestApi.Core.Services.DataSync;
@@ -8,8 +7,7 @@ public class SyncDataStagingService : ISyncDataStagingService
 {
     private readonly IBulkCopyService _bulkCopyService;
     public SyncDataStagingService(
-        IBulkCopyService bulkCopyService,
-        ILogger<SyncDataStagingService> logger)
+        IBulkCopyService bulkCopyService)
     {
         _bulkCopyService = bulkCopyService;
     }
@@ -30,7 +28,6 @@ public class SyncDataStagingService : ISyncDataStagingService
                     BatchId = safeBatchId,
                     Data = jsonValue,
                     Created = timeNow,
-                    LastModified = timeNow,
                 };
                 syncBatchItems.Add(batchItem);
             }
@@ -44,19 +41,16 @@ public class SyncDataStagingService : ISyncDataStagingService
             throw new StagingException($"Data enumeration failed for {typeof(T).Name}", ex);
         }
 
-        var options = new DataSyncOptions
+        var columnMappings = new Dictionary<string, string>
         {
-            ColumnMappings = new Dictionary<string, string>
-            {
-                { "BatchId", "BatchId" },
-                { "Data", "Data" },
-                { "Created", "Created" }
-            }
+            { "BatchId", "BatchId" },
+            { "Data", "Data" },
+            { "Created", "Created" }
         };
 
         try
         {
-            await _bulkCopyService.CopyAsync(typeof(SyncBatchData).Name, syncBatchItems.ToAsyncEnumerable(), options);
+            await _bulkCopyService.CopyAsync(syncBatchItems.ToAsyncEnumerable(), typeof(SyncBatchData).Name, columnMappings);
         }
         catch (DataSyncException)
         {
