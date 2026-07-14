@@ -2,5 +2,5 @@
 
 public interface ISyncService
 {
-    Task Sync();
+    Task RunAsync();
 }

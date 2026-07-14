@@ -1,11 +1,11 @@
+using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
 using PseRestApi.Core.Dto;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host.Controllers;
 using Xunit;
-using NSubstitute;
-using AwesomeAssertions;
 
 namespace PseRestApi.Test.UnitTests.Controllers;
 
@@ -15,11 +15,11 @@ public class PseStockPriceControllerTests
     private readonly IPseApiService _pseApiService;
     private readonly PseStockPriceController _controller;
 
-    private readonly Stock _mockStock = new()
+    private readonly Stock? _mockStock = new()
     {
         SecurityName = "Test Company",
         Symbol = "TEST",
-        Price = new List<StockPrice> { new() { Currency = "PHP", Price = 100.00 } },
+        Price = [new() { Currency = "PHP", Price = 100.00 }],
         AsOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15, 15, 30, 0)),
         PercentChange = 2.5,
         Volume = 1500000
@@ -76,7 +76,7 @@ public class PseStockPriceControllerTests
     public async Task Get_WithNullAsOfDate_ReturnsLatestPrice()
     {
         // Arrange
-        string symbol = _mockStock.Symbol!;
+        string symbol = _mockStock?.Symbol!;
         _pseApiService.GetStockLatestPriceAsync(Arg.Any<string>()).Returns(Task.FromResult(_mockStock));
 
         // Act
@@ -90,7 +90,7 @@ public class PseStockPriceControllerTests
         apiResponse.Success.Should().BeTrue();
         apiResponse.Data.Should().NotBeNull();
         apiResponse.Data.Symbol.Should().Be(symbol);
-        apiResponse.Data.SecurityName.Should().Be(_mockStock.SecurityName);
+        apiResponse.Data.SecurityName.Should().Be(_mockStock?.SecurityName);
         apiResponse.Message.Should().Be("Latest stock price returned successfully");
 
         await _pseApiService.Received(1).GetStockLatestPriceAsync(symbol);
@@ -101,7 +101,7 @@ public class PseStockPriceControllerTests
     {
         // Arrange
         string symbol = "INVALID";
-        _pseApiService.GetStockLatestPriceAsync(Arg.Any<string>()).Returns(Task.FromResult<Stock>(null!));
+        _pseApiService.GetStockLatestPriceAsync(Arg.Any<string>()).Returns(Task.FromResult<Stock?>(null));
 
         // Act
         IActionResult result = await _controller.Get(symbol);
@@ -121,7 +121,7 @@ public class PseStockPriceControllerTests
     public async Task Get_WithAsOfDate_ReturnsHistoricalPrice()
     {
         // Arrange
-        string symbol = _mockStock.Symbol!;
+        string symbol = _mockStock?.Symbol!;
         DateOnly asOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15));
         _pseApiService.GetStockPriceAsOfDateAsync(Arg.Any<string>(), asOfDate).Returns(Task.FromResult(_mockStock));
 
@@ -146,7 +146,7 @@ public class PseStockPriceControllerTests
         // Arrange
         string symbol = "INVALID";
         DateOnly asOfDate = DateOnly.FromDateTime(new DateTime(2025, 1, 15));
-        _pseApiService.GetStockPriceAsOfDateAsync(Arg.Any<string>(), asOfDate).Returns(Task.FromResult<Stock>(null!));
+        _pseApiService.GetStockPriceAsOfDateAsync(Arg.Any<string>(), asOfDate).Returns(Task.FromResult<Stock?>(null));
 
         // Act
         IActionResult result = await _controller.Get(symbol, asOfDate);
@@ -167,7 +167,8 @@ public class PseStockPriceControllerTests
     {
         // Arrange
         string symbol = "BPI";
-        _pseApiService.GetStockLatestPriceAsync(Arg.Any<string>()).Returns(Task.FromException<Stock>(new InvalidOperationException("Service unavailable")));
+        _pseApiService.GetStockLatestPriceAsync(Arg.Any<string>())
+            .Returns(Task.FromException<Stock?>(new InvalidOperationException("Service unavailable")));
 
         // Act
         IActionResult result = await _controller.Get(symbol);
@@ -379,7 +380,7 @@ public class PseStockPriceControllerTests
 
         var paginatedResult = new PaginatedResult<Stock>
         {
-            Items = new List<Stock> { _mockStock },
+            Items = [_mockStock!],
             TotalCount = 1,
             PageNumber = 1,
             PageSize = 10
@@ -393,7 +394,7 @@ public class PseStockPriceControllerTests
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var apiResponse = okResult.Value.Should().BeOfType<ApiResponse<PaginatedResult<Stock>>>().Subject;
+        var apiResponse = okResult.Value.Should().BeOfType<ApiResponse<PaginatedResult<Stock?>>>().Subject;
 
         apiResponse.Should().NotBeNull();
         apiResponse.Success.Should().BeTrue();
@@ -422,7 +423,7 @@ public class PseStockPriceControllerTests
 
         var paginatedResult = new PaginatedResult<Stock>
         {
-            Items = Enumerable.Empty<Stock>(),
+            Items = [],
             TotalCount = 0,
             PageNumber = 1,
             PageSize = 10

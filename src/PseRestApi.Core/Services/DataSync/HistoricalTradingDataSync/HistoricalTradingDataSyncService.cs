@@ -1,37 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
-using PseRestApi.Core.Common;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PseRestApi.Domain.Entities;
 
 namespace PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
 
 public class HistoricalTradingDataSyncService : BaseSyncService<HistoricalTradingData>, IHistoricalTradingDataSyncService
 {
+    private readonly IServiceProvider _serviceProvider;
+
     public HistoricalTradingDataSyncService(
         IHistoricalTradingDataSyncDataProvider syncDataProvider,
-        ISyncDataStagingService syncDataStagingService,
-        IDbConnectionProvider connectionProvider,
-        ILogger<HistoricalTradingDataSyncService> logger) : base(syncDataProvider, syncDataStagingService, connectionProvider, logger)
+        ISyncStrategyFactory strategyFactory,
+        IServiceProvider serviceProvider,
+        ILogger<HistoricalTradingDataSyncService> logger)
+        : base(syncDataProvider, strategyFactory, logger)
     {
+        _serviceProvider = serviceProvider;
     }
-    public override async Task Sync()
+
+    public override Task RunAsync()
     {
-        await Sync(options =>
-            options
-            .SkipStaging()
-            .WithTargetTable("HistoricalTradingData")
-            .WithColumnMappings(new Dictionary<string, string>()
-            {
-                { "SecurityId", "SecurityId" },
-                { "Symbol", "Symbol" },
-                { "Currency", "Currency" },
-                { "Change", "Change" },
-                { "PercentChange", "PercentChange" },
-                { "Price", "Price" },
-                { "TradeDate", "TradeDate" },
-                { "Value", "Value" },
-                { "Volume", "Volume" },
-                { "Created", "Created" },
-            })
-        );
+        var provider = _serviceProvider.GetKeyedService<ISyncOptionsProvider>("HistoricalTradingData");
+        return provider == null
+            ? throw new InvalidOperationException("No ISyncOptionsProvider registered for HistoricalTradingData.")
+            : RunAsyncImpl(provider.GetOptions());
     }
 }

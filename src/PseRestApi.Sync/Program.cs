@@ -7,6 +7,7 @@ using PseRestApi.Core.Services.DataSync.HistoricalTradingDataSync;
 using PseRestApi.Core.Services.DataSync.SecurityInfoSync;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Infrastructure;
+using Serilog;
 
 try
 {
@@ -45,7 +46,13 @@ try
         .ConfigureLogging((context, loggingBuilder) =>
         {
             loggingBuilder.ClearProviders();
-            loggingBuilder.AddConsole();
+            loggingBuilder.AddSerilog();
+        })
+        .UseSerilog((context, loggerConfig) =>
+        {
+            loggerConfig
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext();
         })
         .Build();
 
@@ -54,10 +61,10 @@ try
     var historicalTradingDataSyncService = serviceScope.ServiceProvider.GetService<IHistoricalTradingDataSyncService>();
     if (securityInfoSyncService != null)
     {
-        await securityInfoSyncService.Sync();
+        await securityInfoSyncService.RunAsync();
         if (historicalTradingDataSyncService != null)
         {
-            await historicalTradingDataSyncService.Sync();
+            await historicalTradingDataSyncService.RunAsync();
         }
     }
 }

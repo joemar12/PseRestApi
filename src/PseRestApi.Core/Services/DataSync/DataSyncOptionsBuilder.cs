@@ -2,86 +2,46 @@
 
 public class DataSyncOptionsBuilder
 {
-    private readonly DataSyncOptions _options;
-    public DataSyncOptionsBuilder()
+    private readonly DataSyncOptions _options = new();
+
+    /// <summary>
+    /// Configures staged sync (default). Pass true to skip staging and use direct bulk copy instead.
+    /// </summary>
+    public DataSyncOptionsBuilder WithSkipStaging(bool skipStaging = false)
     {
-        _options = new DataSyncOptions();
+        _options.SkipStaging = skipStaging;
+        return this;
     }
 
-    public StagedDataSyncOptionsBuilder WithStaging()
+    public DataSyncOptionsBuilder WithBatchId(Guid? batchId = null)
     {
-        _options.SkipStaging = false;
-        return new StagedDataSyncOptionsBuilder(this);
+        _options.BatchId = batchId ?? Guid.NewGuid();
+        return this;
     }
 
-    public DirectDataSyncOptionsBuilder SkipStaging()
-    {
-        _options.SkipStaging = true;
-        return new DirectDataSyncOptionsBuilder(this);
-    }
-
-    public DataSyncOptions Build()
-    {
-        return _options;
-    }
-}
-
-public class StagedDataSyncOptionsBuilder
-{
-    private readonly DataSyncOptions _options;
-
-    public StagedDataSyncOptionsBuilder(DataSyncOptionsBuilder builder)
-    {
-        _options = builder.Build();
-    }
-
-    public StagedDataSyncOptionsBuilder WithMergeCommand(string mergeCommand)
+    public DataSyncOptionsBuilder WithMergeCommand(string? mergeCommand)
     {
         _options.MergeCommand = mergeCommand;
         return this;
     }
 
-    public StagedDataSyncOptionsBuilder WithCleanupCommand(string cleanupCommand)
+    public DataSyncOptionsBuilder WithCleanupCommand(string? cleanupCommand)
     {
         _options.CleanupCommand = cleanupCommand;
         return this;
     }
 
-    public StagedDataSyncOptionsBuilder WithBatchId(Guid batchId)
-    {
-        _options.BatchId = batchId;
-        return this;
-    }
-
-    public DataSyncOptions Build()
-    {
-        return _options;
-    }
-}
-
-public class DirectDataSyncOptionsBuilder
-{
-    private readonly DataSyncOptions _options;
-
-    public DirectDataSyncOptionsBuilder(DataSyncOptionsBuilder builder)
-    {
-        _options = builder.Build();
-    }
-
-    public DirectDataSyncOptionsBuilder WithTargetTable(string targetTable)
+    public DataSyncOptionsBuilder WithTargetTable(string? targetTable)
     {
         _options.TargetTable = targetTable;
         return this;
     }
 
-    public DirectDataSyncOptionsBuilder WithColumnMappings(Dictionary<string, string> columnMappings)
+    public DataSyncOptionsBuilder WithColumnMappings(Dictionary<string, string> columnMappings)
     {
         _options.ColumnMappings = columnMappings;
         return this;
     }
 
-    public DataSyncOptions Build()
-    {
-        return _options;
-    }
+    public DataSyncOptions Build() => _options;
 }

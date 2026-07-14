@@ -2,9 +2,16 @@ using PseRestApi.Core;
 using PseRestApi.Core.Services.PseApi;
 using PseRestApi.Host;
 using PseRestApi.Infrastructure;
+using Serilog;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, loggerConfig) =>
+{
+    loggerConfig
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext();
+});
 
 // Load connection string from Docker secret if available
 var connectionStringPath = builder.Configuration["ConnectionStrings:DefaultConnectionString"];

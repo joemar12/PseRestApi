@@ -1,69 +1,66 @@
-﻿using Microsoft.Extensions.Logging;
-using Npgsql;
-using PseRestApi.Core.Common;
-using PseRestApi.Domain.Entities;
-using System.Data;
+﻿using PseRestApi.Domain.Entities;
 using System.Text.Json;
 
 namespace PseRestApi.Core.Services.DataSync;
 
 public class SyncDataStagingService : ISyncDataStagingService
 {
-    private readonly IDbConnectionProvider _connectionProvider;
-    private readonly ILogger<SyncDataStagingService> _logger;
+    private readonly IBulkCopyService _bulkCopyService;
     public SyncDataStagingService(
-        IDbConnectionProvider dbConnectionProvider,
-        ILogger<SyncDataStagingService> logger)
+        IBulkCopyService bulkCopyService)
     {
-        _connectionProvider = dbConnectionProvider;
-        _logger = logger;
+        _bulkCopyService = bulkCopyService;
     }
 
     public async Task<Guid> Stage<T>(IAsyncEnumerable<T> stagingData, Guid? batchId = null) where T : class
     {
         var safeBatchId = (batchId == null || batchId == Guid.Empty) ? Guid.NewGuid() : batchId.GetValueOrDefault();
-        var timeNow = DateTime.Now;
+        var timeNow = DateTime.UtcNow;
         var syncBatchItems = new List<SyncBatchData>();
-        await foreach (var item in stagingData)
+
+        try
         {
-            var jsonValue = JsonSerializer.Serialize(item);
-            var batchItem = new SyncBatchData()
+            await foreach (var item in stagingData)
             {
-                BatchId = safeBatchId,
-                Data = jsonValue,
-                Created = timeNow,
-                LastModified = timeNow,
-            };
-            syncBatchItems.Add(batchItem);
+                var jsonValue = JsonSerializer.Serialize(item);
+                var batchItem = new SyncBatchData()
+                {
+                    BatchId = safeBatchId,
+                    Data = jsonValue,
+                    Created = timeNow,
+                };
+                syncBatchItems.Add(batchItem);
+            }
+        }
+        catch (JsonException ex)
+        {
+            throw new StagingException($"Serialization failed for {typeof(T).Name}", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new StagingException($"Data enumeration failed for {typeof(T).Name}", ex);
         }
 
-        using var connection = _connectionProvider.CreateConnection();
-        if (connection != null)
+        var columnMappings = new Dictionary<string, string>
         {
-            var sourceTable = syncBatchItems.ToDataTable();
-            var columnNames = sourceTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName).Skip(1).ToArray();
-            try
-            {
-                await using var npgsqlConnection = connection as NpgsqlConnection ?? throw new InvalidOperationException("Connection is not an NpgsqlConnection");
-                await npgsqlConnection.OpenAsync();
-                var joinedColumnNames = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
-                await using var copyWriter = await npgsqlConnection.BeginBinaryImportAsync($"COPY \"SyncBatchData\" ({joinedColumnNames})  FROM STDIN (FORMAT BINARY)");
-                foreach (DataRow row in sourceTable.Rows)
-                {
-                    await copyWriter.StartRowAsync();
-                    await copyWriter.WriteAsync(row["BatchId"]);
-                    await copyWriter.WriteAsync(row["Data"] ?? DBNull.Value);
-                    await copyWriter.WriteAsync(row["Created"] ?? DBNull.Value);
-                    await copyWriter.WriteAsync(row["LastModified"] ?? DBNull.Value);
-                }
-                await copyWriter.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Data staging failed for {nameof(T)}");
-                throw;
-            }
+            { "BatchId", "BatchId" },
+            { "Data", "Data" },
+            { "Created", "Created" }
+        };
+
+        try
+        {
+            await _bulkCopyService.CopyAsync(syncBatchItems.ToAsyncEnumerable(), typeof(SyncBatchData).Name, columnMappings);
         }
+        catch (DataSyncException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new StagingException($"Bulk insert to staging failed for {typeof(T).Name}", ex);
+        }
+
         return safeBatchId;
     }
 }
