@@ -9,7 +9,6 @@ on:
 jobs:
   rotate-snapshot:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Delete previous snapshot (if any)
         env:
@@ -33,7 +32,7 @@ jobs:
           fi
 
           # Free plan only allows 1 manual snapshot, so this just grabs the first/only one.
-          snapshot_id=$(echo "$body" | jq -r '.snapshots[0].snapshot.id // empty')
+          snapshot_id=$(echo "$body" | jq -r '.snapshots[0].id // empty')
 
           if [ -z "$snapshot_id" ]; then
             echo "No existing snapshot found, nothing to delete."
